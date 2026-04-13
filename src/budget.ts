@@ -109,15 +109,6 @@ function getCategorySpent(cat: string): number {
     return getMonthExpenses().filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0);
 }
 
-function getWeeklyData(): number[] {
-    const weeks = [0, 0, 0, 0];
-    getMonthExpenses().forEach(e => {
-        const day = new Date(e.date).getDate();
-        const wk = Math.min(Math.floor((day - 1) / 7), 3);
-        weeks[wk] += e.amount;
-    });
-    return weeks;
-}
 
 /* ── Toast ── */
 function showToast(msg: string, isError = false) {
