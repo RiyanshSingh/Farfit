@@ -909,7 +909,17 @@ function init() {
 }
 
 (window as any).initMain = init;
-document.addEventListener('DOMContentLoaded', () => {
+
+const runInit = () => {
+    if ((window as any)._mainInitialized) return;
+    (window as any)._mainInitialized = true;
     init();
     initSPA();
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runInit);
+} else {
+    runInit();
+}
+

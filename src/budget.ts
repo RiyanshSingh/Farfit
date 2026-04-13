@@ -421,6 +421,3 @@ async function init() {
 
 (window as any).initBudget = init;
 (window as any).customAddExpense = addExpense;
-
-init();
-initSPA();
