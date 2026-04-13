@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
 import { healthianPrompt, healthianConfirm } from './prompt';
-import { initSPA } from './router';
 
 /* ── Budget State ── */
 const BUDGET_KEY = 'healthian_budget';
