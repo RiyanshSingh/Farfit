@@ -14,7 +14,6 @@ const state = {
     daily: {} as Record<string, any>, 
     waterGoal: 4.0,
     stepsGoal: 8000,
-    waterGoal: 2.0,
     height: "6'0\"",
     weightMin: 72,
     weightMax: 82,
