@@ -1,0 +1,355 @@
+/* ── PREMIUM RESPONSIVE SYSTEM (MOBILE FIRST FOCUS) ── */
+
+/* 1. Global Reset for Mobile */
+@media (max-width: 1024px) {
+    :root {
+        --radius: 24px;
+        --radius-sm: 16px;
+    }
+
+    /* Keep top bar for Avatar and Logo, but hide desktop links */
+    nav:not(.bottom-nav) {
+        display: flex !important;
+        padding: 10px 20px 0 20px !important;
+        justify-content: space-between !important;
+    }
+
+    nav:not(.bottom-nav) .nav-links {
+        display: none !important;
+    }
+
+    .page {
+        padding: calc(env(safe-area-inset-top) + 20px) 20px 120px 20px !important;
+        max-width: 100%;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 32px;
+        letter-spacing: -1px;
+    }
+
+    .header-btns {
+        width: 100%;
+        display: flex;
+        flex-direction: row; /* Back to side-by-side */
+        gap: 8px;
+        align-items: center;
+    }
+
+    .header-btns button {
+        min-height: 46px !important;
+        font-size: 13px !important;
+        border-radius: 40px !important;
+        padding: 6px 14px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .workout-dropdown-container {
+        flex: 1.8; /* More space for exercise */
+        min-width: 0; /* Critical for ellipsis to work */
+    }
+    
+    .date-btn {
+        flex: 1;
+        min-width: 0;
+        justify-content: center !important;
+    }
+
+    .cardio-btn {
+        justify-content: flex-start !important;
+    }
+
+    .cardio-btn {
+        width: 100%;
+    }
+
+    /* Column Stacking */
+    .dashboard-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 14px !important; /* Optimized tight spacing */
+    }
+
+    .col-1, .col-2, .col-3 {
+        display: contents;
+    }
+
+    /* Refined Swap Hierarchy */
+    .stats-grid { order: 1; margin-bottom: 0; }
+    .training-card { order: 2; margin-bottom: 0; }
+    .chart-card { order: 3; margin-bottom: 0; }
+    .exercises-section { order: 4; margin-bottom: 0; }
+    .heart-card { order: 5; margin-bottom: 0; }
+    .wellness-card { order: 6; margin-bottom: 120px; } /* Space for bottom nav */
+
+    /* Stats Grid Fix for index.html */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        display: grid !important;
+    }
+
+    .stats-card {
+        padding: 16px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    }
+
+    /* ── CHART MOBILE OPTIMIZATION ── */
+    @media (max-width: 480px) {
+        .chart-card {
+            padding: 20px 12px !important;
+        }
+        .chart-stats {
+            gap: 12px !important;
+            margin-bottom: 15px !important;
+        }
+        .stat-box .icon {
+            width: 32px !important;
+            height: 32px !important;
+        }
+        .stat-box div div:last-child {
+            font-size: 18px !important;
+        }
+        .bar-chart {
+            gap: 4px !important;
+            padding: 0 4px !important;
+            height: 160px !important;
+        }
+        .bars {
+            gap: 3px !important;
+            padding: 2px 4px 0 4px !important;
+            height: 90px !important;
+        }
+        .bar {
+            width: 12px !important;
+            height: 90px !important;
+        }
+        .bar-label {
+            font-size: 10px !important;
+        }
+        .chart-date {
+            font-size: 15px !important;
+        }
+        .bar-tip {
+            font-size: 10px !important;
+            padding: 2px 6px !important;
+            top: -28px !important;
+        }
+    }
+
+    .stat-val {
+        font-size: 26px !important;
+    }
+
+    /* Chart Scaling */
+    .chart-card {
+        padding: 24px !important;
+        min-height: 400px !important; /* Slightly reduced as requested */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chart-stats {
+        margin-bottom: 30px !important;
+        gap: 20px !important;
+    }
+
+    .bar-chart {
+        padding: 0 5px !important;
+        height: 170px !important; /* Slightly reduced */
+        margin-top: auto;
+    }
+
+    .bar {
+        width: 12px !important;
+    }
+
+    .bar-tip {
+        font-size: 10px !important;
+        padding: 3px 8px !important;
+    }
+
+    /* Heart & Area Illustrations Fix */
+    .heart-card {
+        min-height: 240px !important;
+    }
+
+    .heart-illustration {
+        width: 140px !important;
+        height: 110px !important;
+    }
+
+    /* ── FLOAT DOCK NAVIGATION (REFINED & COMPACT) ── */
+    .bottom-nav {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 60px); /* Slightly narrower */
+        max-width: 380px; 
+        height: 64px; /* More compact */
+        background: rgba(255, 255, 255, 0.85); /* White Premium Glass */
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        display: flex !important;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 10px;
+        z-index: 9999;
+        border-radius: 50px; 
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Softer shadow for white */
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+    }
+
+    .bottom-nav.hide {
+        transform: translate(-50%, 150%);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .bottom-nav a {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #8e8e93; /* Subtle grey for inactive */
+        font-size: 10px;
+        font-weight: 800;
+        gap: 3px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .bottom-nav a svg {
+        width: 22px;
+        height: 22px;
+        stroke: currentColor;
+        stroke-width: 2.3px;
+        fill: none;
+        transition: all 0.3s ease;
+    }
+
+    .bottom-nav a.active {
+        color: #1a1a1a; /* Dark for active */
+    }
+
+    .bottom-nav a.active svg {
+        stroke: #1a1a1a;
+        fill: rgba(0, 0, 0, 0.03);
+        transform: translateY(-2px);
+    }
+
+    /* Refined indicator */
+    .bottom-nav a.active::after {
+        content: '';
+        position: absolute;
+        bottom: 6px;
+        width: 12px;
+        height: 3px;
+        border-radius: 10px;
+        background: var(--olive);
+        box-shadow: 0 0 8px var(--olive);
+    }
+
+    /* Micro-animation on tap */
+    .bottom-nav a:active {
+        transform: scale(0.9);
+        opacity: 0.7;
+    }
+
+    /* Dark mode dock overrides */
+    [data-theme="dark"] .bottom-nav {
+        background: rgba(30, 41, 59, 0.85) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+    }
+    [data-theme="dark"] .bottom-nav a {
+        color: rgba(255, 255, 255, 0.45);
+    }
+    [data-theme="dark"] .bottom-nav a.active {
+        color: #fff;
+    }
+    [data-theme="dark"] .bottom-nav a.active svg {
+        stroke: #fff;
+        fill: rgba(255, 255, 255, 0.05);
+    }
+
+
+    /* ── PAGE SPECIFIC FIXES ── */
+
+    /* Training Calendar Scroll */
+    .cal-grid {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        overflow-x: hidden !important; /* Ensure it fits */
+    }
+
+    .cal-day, .cal-avatar {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 13px !important;
+    }
+
+    /* Macros Ring Scaling */
+    .macro-ring {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    /* Savings digital card */
+    .ins-card {
+        aspect-ratio: 1.6;
+        padding: 20px !important;
+        border-radius: 20px !important;
+    }
+
+    .balance-card {
+        padding: 24px !important;
+    }
+
+    .bal-val {
+        font-size: 38px !important;
+    }
+
+    /* Exercises Video scaling */
+    .video-thumbnail {
+        height: 180px !important;
+    }
+
+    /* Condition pills check-btns */
+    .check-btn {
+        width: 36px !important;
+        height: 36px !important;
+    }
+}
+
+/* ── SMALL PHONES (Tweak) ── */
+@media (max-width: 370px) {
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 28px;
+    }
+    
+    .stat-val {
+        font-size: 24px !important;
+    }
+}

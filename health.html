@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Metrics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+    <link rel="stylesheet" href="health.css">
+</head>
+
+<body>
+
+    <nav>
+        <svg class="logo" viewBox="0 0 52 52" fill="none">
+            <circle cx="26" cy="26" r="25" stroke="#5bbcd6" stroke-width="2"/>
+            <path d="M10 26 Q18 14 26 26 Q34 38 42 26" stroke="#5bbcd6" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M10 30 Q18 18 26 30 Q34 42 42 30" stroke="#a8dce8" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+
+        <div class="nav-links">
+            <a href="index.html">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Home
+            </a>
+            <a href="health.html" class="active">
+                <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Health
+            </a>
+            <a href="exercises.html">
+                <svg viewBox="0 0 24 24"><path d="M20.5 13.5l-7 7a2 2 0 0 1-2.8 0L2 12V2h10l8.5 8.5a2 2 0 0 1 0 2.8z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                Exercises
+            </a>
+
+            <a href="savings.html">
+                <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Savings
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <span class="greeting">Hello, Riyansh 👋</span>
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" class="avatar" alt="User" id="settings-trigger" style="cursor:pointer;" title="Profile Settings">
+            <button class="bell-btn">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="page">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Health Analytics</h1>
+            <div class="header-btns">
+                <button class="date-btn" style="background:var(--blue-card); color:#12121a;">
+                    <svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export Report 
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <!-- ── MACRO COL 1 ── -->
+            <div class="col-1">
+                <div class="stats-grid">
+                    
+                    <!-- Blood Pressure -->
+                    <div class="stats-card">
+                        <div class="cal-top">
+                            <div class="icon-circle" style="background:#e03070;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </div>
+                            <div class="badge-1d">Avg</div>
+                        </div>
+                        <div class="stat-name">Blood Pressure</div>
+                        <div class="stat-desc">Optimal range (Sys/Dia)</div>
+                        <div class="stat-val">118<span>/78</span></div>
+                    </div>
+
+                    <!-- SpO2 -->
+                    <div class="stats-card">
+                        <div class="cal-top">
+                            <div class="icon-circle" style="background:#4a90e2;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            </div>
+                            <div class="badge-height">98%</div>
+                        </div>
+                        <div class="stat-name">Blood Oxygen</div>
+                        <div class="stat-desc">Normal SpO2 level</div>
+                        <div class="stat-val">98<span>%</span></div>
+                    </div>
+                </div>
+
+                <!-- Sleep Analysis -->
+                <div class="sleep-card">
+                    <div class="sleep-top">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <svg class="sleep-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                            <span style="font-size: 20px; font-weight: 900;">Sleep Details</span>
+                        </div>
+                        <div class="sleep-badge">Very Good</div>
+                    </div>
+
+                    <svg class="sleep-illustration" viewBox="0 0 300 120" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="sleepGrad" x1="0" x2="0" y1="0" y2="1">
+                                <stop offset="0%" stop-color="#5a5ad2" stop-opacity="0.8"/>
+                                <stop offset="100%" stop-color="#5a5ad2" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Sleep area fill -->
+                        <path d="M0 120 L0 50 C 30 50, 40 80, 60 80 C 80 80, 90 20, 110 20 C 130 20, 140 90, 170 90 C 190 90, 200 60, 230 60 C 260 60, 270 100, 300 100 L 300 120 Z" fill="url(#sleepGrad)"/>
+                        <!-- Sleep line stroke -->
+                        <path d="M0 50 C 30 50, 40 80, 60 80 C 80 80, 90 20, 110 20 C 130 20, 140 90, 170 90 C 190 90, 200 60, 230 60 C 260 60, 270 100, 300 100" fill="none" stroke="#a0a0ff" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="110" cy="20" r="5" fill="#fff" stroke="#a0a0ff" stroke-width="2"/>
+                    </svg>
+
+                    <div class="sleep-bottom">
+                        <div style="color:#a0a0ff; font-weight:800; font-size:14px; margin-bottom:2px;">↑ 45m from last week</div>
+                        <div style="font-size:32px; font-weight:900; line-height:1; display:flex; align-items:baseline; gap:6px;">
+                            7<span style="font-size:15px; color:#888;">h</span> 24<span style="font-size:15px; color:#888;">m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                     <div class="stats-card">
+                        <div class="cal-top" style="margin-bottom:18px;">
+                            <div class="icon-circle" style="background:#f5a623;">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                            </div>
+                        </div>
+                        <div class="stat-name">Body Temp</div>
+                        <div class="stat-desc">Normal range</div>
+                        <div class="stat-val">98.4<span>°F</span></div>
+                    </div>
+                    <div class="stats-card blue">
+                        <div class="cal-top" style="margin-bottom:18px;">
+                            <div class="icon-circle blue">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#122a3e" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                        </div>
+                        <div class="stat-name">Resting HR</div>
+                        <div class="stat-desc">Excellent condition</div>
+                        <div class="stat-val">58<span>bpm</span></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── MACRO COL 2 ── -->
+            <div class="col-2">
+                <!-- Macronutrients Ring -->
+                <div class="macros-card">
+                    <div class="macros-header">
+                        <span style="font-size:22px; font-weight:900;">Daily Macros</span>
+                        <button class="today-dropdown">Today <svg width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg></button>
+                    </div>
+                    <div class="macro-ring">
+                        <svg viewBox="0 0 36 36">
+                            <path stroke="#f0f4f6" stroke-width="4" fill="none" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32"/>
+                            <!-- Carbs -->
+                            <path id="ring-carbs" stroke="#f5a623" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="0, 100" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32"/>
+                            <!-- Protein -->
+                            <path id="ring-prot" stroke="#e03070" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="0, 100" stroke-dashoffset="-0" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32"/>
+                            <!-- Fats -->
+                            <path id="ring-fats" stroke="#4a90e2" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="0, 100" stroke-dashoffset="-0" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32"/>
+                        </svg>
+                        <div class="steps-icon-inner" style="flex-direction:column;">
+                            <span style="font-size:24px; font-weight:900;">2240</span>
+                            <span style="font-size:12px; font-weight:700; color:#888;">Kcal Total</span>
+                        </div>
+                    </div>
+                    <div class="macro-stats">
+                        <div class="macro-stat">
+                            <div class="dot" style="background:#f5a623;"></div><span style="font-weight:900; font-size:16px;">180g</span>
+                            <div style="font-size:13px;color:#888;margin-top:2px;font-weight:700;">Carbs (45%)</div>
+                        </div>
+                        <div class="macro-stat">
+                            <div class="dot" style="background:#e03070;"></div><span style="font-weight:900; font-size:16px;">120g</span>
+                            <div style="font-size:13px;color:#888;margin-top:2px;font-weight:700;">Protein (30%)</div>
+                        </div>
+                        <div class="macro-stat">
+                            <div class="dot" style="background:#4a90e2;"></div><span style="font-weight:900; font-size:16px;">62g</span>
+                            <div style="font-size:13px;color:#888;margin-top:2px;font-weight:700;">Fats (25%)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Symptoms / Status -->
+                <div class="exercises-section" style="flex:1;">
+                    <div class="section-header">
+                        <span style="font-size:22px; font-weight:900;">Condition Check</span>
+                        <button id="add-symptom-btn" class="today-dropdown" style="background:var(--olive); color:#12121a; cursor:pointer;">
+                            <svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add
+                        </button>
+                    </div>
+
+                    <div id="symptoms-list" style="display:flex; flex-direction:column; gap:12px; flex:1;">
+                        <!-- Dynamic Symptoms Here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── MACRO COL 3 ── -->
+            <div class="col-3">
+                <!-- Upcoming Appointments -->
+                <div class="appts-card">
+                    <div class="section-header" style="margin-bottom:8px;">
+                        <span style="font-size:20px; font-weight:900;">Next Appointment</span>
+                        <div class="badge-1d" style="background:rgba(255,255,255,0.4); color:#12121a;">Tomorrow</div>
+                    </div>
+                    <div class="appt-doc">
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=100&q=80" class="doc-img" alt="Doctor">
+                        <div class="doc-info">
+                            <div style="font-size:16px; font-weight:900;">Dr. Gregory House</div>
+                            <div style="font-size:13px; color:#3a5a6e; font-weight:700;">Cardiology Specialist</div>
+                        </div>
+                        <button style="width:36px; height:36px; border-radius:50%; background:#12121a; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">
+                            <svg width="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+                    <div style="margin-top: 20px; background: rgba(255,255,255,0.4); border-radius: 12px; padding: 12px; display:flex; gap:12px; align-items:center;">
+                         <div style="width:42px; height:42px; background:#fff; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                             <span style="font-size:10px; font-weight:800; color:#e03070; text-transform:uppercase;">May</span>
+                             <span style="font-size:15px; font-weight:900; line-height:1;">24</span>
+                         </div>
+                         <div>
+                             <div style="font-size:14px; font-weight:800;">10:00 AM - 10:45 AM</div>
+                             <div style="font-size:12px; font-weight:700; color:#3a5a6e; margin-top:2px;">City Medical Center</div>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Medication Tracker -->
+                <div class="meds-card">
+                    <div class="section-header">
+                        <span style="font-size:20px; font-weight:900;">Medication Plan</span>
+                        <span style="font-size:14px; font-weight:800; color:#888;">2/3 Taken</span>
+                    </div>
+
+                    <div class="med-item">
+                        <div class="med-time">08:00</div>
+                        <div class="med-icon" style="background:#e0f2fe; color:#0284c7;">
+                            <svg width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.5 20.5 4 14l10-10 6.5 6.5-10 10Z"/><path d="m14 6-6 6"/></svg>
+                        </div>
+                        <div class="med-info">
+                            <div class="med-name">Vitamin D3</div>
+                            <div class="med-desc">2000 IU · After food</div>
+                        </div>
+                        <div class="check-btn"><svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+
+                    <div class="med-item">
+                        <div class="med-time">14:00</div>
+                        <div class="med-icon" style="background:#fef08a; color:#a16207;">
+                            <svg width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.5 20.5 4 14l10-10 6.5 6.5-10 10Z"/><path d="m14 6-6 6"/></svg>
+                        </div>
+                        <div class="med-info">
+                            <div class="med-name">Omega 3 Core</div>
+                            <div class="med-desc">1 Capsule · Post lunch</div>
+                        </div>
+                        <div class="check-btn"><svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+
+                    <div class="med-item" style="margin-top:auto;">
+                        <div class="med-time" style="color:#aaa;">21:00</div>
+                        <div class="med-icon" style="background:#f3f4f6; color:#9ca3af;">
+                            <svg width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.5 20.5 4 14l10-10 6.5 6.5-10 10Z"/><path d="m14 6-6 6"/></svg>
+                        </div>
+                        <div class="med-info">
+                            <div class="med-name" style="color:#888;">Magnesium Zn</div>
+                            <div class="med-desc">400mg · Before bed</div>
+                        </div>
+                        <div class="check-btn outline"><svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- APK-style bottom navigation (mobile only) -->
+    <nav class="bottom-nav">
+        <a href="index.html">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+        </a>
+        <a href="health.html" class="active">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Health
+        </a>
+        <a href="exercises.html">
+            <svg viewBox="0 0 24 24"><path d="M20.5 13.5l-7 7a2 2 0 0 1-2.8 0L2 12V2h10l8.5 8.5a2 2 0 0 1 0 2.8z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Exercises
+        </a>
+        <a href="savings.html">
+            <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            Savings
+        </a>
+    </nav>
+
+    <div id="calendar-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Select Date</h3><button class="close-modal">&times;</button></div>
+            <div class="modal-month-nav month-nav">
+                <button class="prev-m"><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <span class="m-label">May 2024</span>
+                <button class="next-m"><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </div>
+            <div class="modal-cal-grid cal-grid"></div>
+        </div>
+    </div>
+
+    <!-- Symptom Modal -->
+    <div id="symptom-modal" class="modal">
+        <div class="modal-content" style="max-width: 360px;">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h3>Add Condition</h3>
+                <button class="close-symptom" style="background:#f0f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">CONDITION TITLE</label>
+                    <input type="text" id="inp-symp-title" style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;" placeholder="e.g. Mild Migraine">
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">DESCRIPTION / NOTES</label>
+                    <textarea id="inp-symp-desc" style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:14px;font-weight:600;min-height:80px;font-family:inherit;" placeholder="How do you feel?"></textarea>
+                </div>
+                <button id="save-symptom-btn" style="margin-top:10px;width:100%;padding:16px;background:var(--olive);color:#12121a;border:none;border-radius:16px;font-weight:800;font-size:16px;cursor:pointer;">Log Condition</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal (Universal) -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content" style="max-width: 360px;">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h3 style="font-weight:900;">User Settings</h3>
+                <button class="close-settings"
+                    style="background:#f0f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:var(--toggle-bg); border-radius:16px;">
+                    <span style="font-weight:800; font-size:14px; color:var(--text-dark);">Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div style="font-size:12px; color:var(--text-light); text-align:center; padding:10px;">
+                    Other biometrics available on Home Dashboard
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

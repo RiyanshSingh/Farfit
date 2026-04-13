@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+</head>
+
+<body>
+
+    <nav>
+        <svg class="logo" viewBox="0 0 52 52" fill="none">
+            <circle cx="26" cy="26" r="25" stroke="#5bbcd6" stroke-width="2" />
+            <path d="M10 26 Q18 14 26 26 Q34 38 42 26" stroke="#5bbcd6" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M10 30 Q18 18 26 30 Q34 42 42 30" stroke="#a8dce8" stroke-width="2" stroke-linecap="round" />
+        </svg>
+
+        <div class="nav-links">
+            <a href="index.html" class="active">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                Home
+            </a>
+            <a href="health.html">
+                <svg viewBox="0 0 24 24">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+                Health
+            </a>
+            <a href="exercises.html">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20.5 13.5l-7 7a2 2 0 0 1-2.8 0L2 12V2h10l8.5 8.5a2 2 0 0 1 0 2.8z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+                Exercises
+            </a>
+
+            <a href="savings.html">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+                Savings
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <span class="greeting">Hello, Riyansh </span>
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80"
+                class="avatar" alt="User" id="settings-trigger" style="cursor:pointer;" title="Profile Settings">
+            <div style="position:relative; display:flex; align-items:center;">
+                <button class="bell-btn" id="bell-trigger">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    <span id="unread-count" class="notification-badge" style="display:none;">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Dashboard</h1>
+            <div class="header-btns">
+                <div class="workout-dropdown-container">
+                    <button class="cardio-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        Cardio 4:32
+                        <div class="pause-icon">
+                            <svg viewBox="0 0 12 12" fill="currentColor">
+                                <rect x="2" y="2" width="3" height="8" rx="1" />
+                                <rect x="7" y="2" width="3" height="8" rx="1" />
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="workout-dropdown">
+                        <div class="dropdown-header">Workout Routine</div>
+                        <div class="dropdown-item active">Treadmill <span>Current</span></div>
+                        <div class="dropdown-item">Jumping Jacks</div>
+                        <div class="dropdown-item">Sprint Interval</div>
+                        <div class="dropdown-item">Recovery</div>
+                        <div class="dropdown-item">Cool Down</div>
+                    </div>
+                </div>
+                <button class="date-btn cal-trigger">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span class="live-date-text">23 May</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        style="width:14px;height:14px;margin-left:4px;">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <!-- ── MACRO COL 1 ── -->
+            <div class="col-1">
+                <div class="stats-grid">
+
+                    <!-- Calories -->
+                    <div class="stats-card">
+                        <div class="cal-top">
+                            <div class="icon-circle orange">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <path
+                                        d="M12 2c0 0-4.5 4-4.5 9a4.5 4.5 0 0 0 9 0c0-5-4.5-9-4.5-9zm0 13.5a2.5 2.5 0 0 1-2.5-2.5c0-1.5 1.5-3 2.5-4 1 1 2.5 2.5 2.5 4a2.5 2.5 0 0 1-2.5 2.5z" />
+                                </svg>
+                            </div>
+                            <div class="badge-1d">1d</div>
+                        </div>
+                        <div class="stat-name">Calories</div>
+                        <div class="stat-desc">Great physical activity</div>
+                        <div class="stat-val">1290 <span>/2340Kcal</span></div>
+                    </div>
+
+                    <!-- Weight -->
+                    <div class="stats-card">
+                        <div class="cal-top">
+                            <div class="icon-circle olive">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white"
+                                    stroke-width="2.5">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <circle cx="12" cy="12" r="3" fill="white" />
+                                    <path d="M12 15v4" />
+                                </svg>
+                            </div>
+                            <div class="badge-height">6'0"</div>
+                        </div>
+                        <div class="stat-name">Weight</div>
+                        <div class="stat-desc">Healthy weight is 72-82kg</div>
+                        <div class="stat-val">198 <span>lbs</span></div>
+                    </div>
+
+                    <!-- Water -->
+                    <div class="stats-card blue water-card">
+                        <div class="cal-top">
+                            <div class="icon-circle blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#122a3e"
+                                    stroke-width="2.5" stroke-linecap="round">
+                                    <path d="M6 4h12l-2 16H8L6 4z" />
+                                    <path d="M7 10h10" stroke-opacity="0.3" />
+                                </svg>
+                            </div>
+                            <div style="font-weight:800; font-size:16px;">1.3l</div>
+                        </div>
+                        <div class="stat-name" style="margin-top:auto;">Water</div>
+                        <div class="stat-desc" style="color:#225566; margin-bottom:0;">Need to drink 2l p/d</div>
+                        <div class="water-bar">
+                            <div class="water-bar-seg"></div>
+                            <div class="water-bar-seg"></div>
+                            <div class="water-bar-seg"></div>
+                            <div class="water-bar-seg"></div>
+                            <div class="water-bar-seg"></div>
+                            <div class="water-bar-seg empty"></div>
+                            <div class="water-bar-seg empty"></div>
+                            <div class="water-bar-seg empty"></div>
+                        </div>
+                    </div>
+
+                    <!-- Glucose -->
+                    <div class="stats-card">
+                        <div class="cal-top" style="margin-bottom:18px;">
+                            <div class="icon-circle gold">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                                    <path
+                                        d="M12 2C12 2 5 9 5 14C5 17.866 8.13401 21 12 21C15.866 21 19 17.866 19 14C19 9 12 2 12 2ZM12 18A4 4 0 1 1 12 10A4 4 0 0 1 12 18Z" />
+                                    <circle cx="12" cy="14" r="1.5" fill="white" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="stat-name">Glucose</div>
+                        <div class="stat-desc">Great level is 54-62 mg/dl</div>
+                        <div class="stat-val">65 <span>mg/dl</span></div>
+                    </div>
+                </div>
+
+                <!-- Heart Rate -->
+                <div class="heart-card">
+                    <div class="heart-top">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <svg class="heart-icon" viewBox="0 0 24 24">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                </svg>
+                                <span style="font-size: 20px; font-weight: 900;">Heart rate</span>
+                            </div>
+                            <div class="normal-badge">
+                                <div class="normal-dot"></div> Normal
+                            </div>
+                        </div>
+                        <div class="time-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                            24h
+                        </div>
+                    </div>
+
+                    <div class="heart-center" style="flex:1; display:flex; align-items:center; justify-content:center;">
+                        <svg class="heart-main-svg" viewBox="0 0 24 24" fill="#ff5e7e" style="filter: drop-shadow(0 8px 16px rgba(255, 94, 126, 0.3));">
+                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </div>
+
+                    <div class="heart-bottom">
+                        <div style="color:#e03070; font-weight:800; font-size:14px; margin-bottom:2px;">↗ 0.6%</div>
+                        <div
+                            style="font-size:32px; font-weight:900; line-height:1; display:flex; align-items:baseline; gap:6px;">
+                            88 <span style="font-size:15px; color:#888;">bpm</span>
+                        </div>
+                    </div>
+                    <button class="arrow-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── MACRO COL 2 ── -->
+            <div class="col-2">
+                <!-- Chart (Moved from Col 1) -->
+                <div class="chart-card">
+                    <div class="chart-nav">
+                        <button class="chart-nav-btn"><svg width="20" viewBox="0 0 24 24" fill="none" stroke="#222"
+                                stroke-width="2">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg></button>
+                        <span class="chart-date">18 May - 24 May</span>
+                        <button class="chart-nav-btn"><svg width="20" viewBox="0 0 24 24" fill="none" stroke="#222"
+                                stroke-width="2">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg></button>
+                    </div>
+
+                    <div class="chart-stats">
+                        <div class="stat-box">
+                            <div class="icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#222"
+                                    stroke-width="2.5">
+                                    <path d="M10 10.5c-2-2-5-1-6.5 1s-1.5 4.5 0 6 4 3 6.5 1.5c2-1.5 3-5 0-8.5z" />
+                                    <path d="M14 13.5c2 2 5 1 6.5-1s1.5-4.5 0-6-4-3-6.5-1.5c-2 1.5-3 5 0 8.5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:800; color:#1a4a5e; opacity: .8;">Steps</div>
+                                <div class="chart-small-steps" style="font-size:24px; font-weight:900; color:#12121a;">0
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-box">
+                            <div class="icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#222"
+                                    stroke-width="2.5" stroke-linejoin="round">
+                                    <path
+                                        d="M12 2c0 0-4.5 4-4.5 9a4.5 4.5 0 0 0 9 0c0-5-4.5-9-4.5-9zm0 13.5a2.5 2.5 0 0 1-2.5-2.5c0-1.5 1.5-3 2.5-4 1 1 2.5 2.5 2.5 4a2.5 2.5 0 0 1-2.5 2.5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:800; color:#1a4a5e; opacity: .8;">Kcal</div>
+                                <div class="chart-small-kcal" style="font-size:24px; font-weight:900; color:#12121a;">0
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bars -->
+                    <div class="bar-chart">
+                        <!-- Day 1 (Mon) -->
+                        <div class="bar-group">
+                            <div class="bars">
+                                <div class="bar dark"></div>
+                                <div class="bar light"></div>
+                                <div class="bar-tip" style="display:none;"></div>
+                            </div>
+                            <div class="bar-label">Mon</div>
+                        </div>
+                        <!-- Day 2 (Tue) -->
+                        <div class="bar-group">
+                            <div class="bars">
+                                <div class="bar dark"></div>
+                                <div class="bar light"></div>
+                                <div class="bar-tip" style="display:none;"></div>
+                            </div>
+                            <div class="bar-label">Tue</div>
+                        </div>
+                        <!-- Day 3 (Wed) -->
+                        <div class="bar-group">
+                            <div class="bars">
+                                <div class="bar dark"></div>
+                                <div class="bar light"></div>
+                                <div class="bar-tip" style="display:none;"></div>
+                            </div>
+                            <div class="bar-label">Wed</div>
+                        </div>
+                        <!-- Day 4 (Thu) -->
+                        <div class="bar-group">
+                            <div class="bars">
+                                <div class="bar dark"></div>
+                                <div class="bar light"></div>
+                                <div class="bar-tip" style="display:none;"></div>
+                            </div>
+                            <div class="bar-label">Thu</div>
+                        </div>
+                        <!-- Day 5 (Fri) -->
+                        <div class="bar-group">
+                            <div class="bars">
+                                <div class="bar dark"></div>
+                                <div class="bar light"></div>
+                                <div class="bar-tip" style="display:none;"></div>
+                            </div>
+                            <div class="bar-label">Fri</div>
+                        </div>
+                        <!-- Day 6 (Sat) -->
+                        <div class="bar-group">
+                            <div class="bars">
+                                <div class="bar dark"></div>
+                                <div class="bar light"></div>
+                                <div class="bar-tip" style="display:none;"></div>
+                            </div>
+                            <div class="bar-label">Sat</div>
+                        </div>
+                        <!-- Day 7 (Sun) -->
+                        <div class="bar-group">
+                            <div class="bars">
+                                <div class="bar dark"></div>
+                                <div class="bar light"></div>
+                                <div class="bar-tip" style="display:none;"></div>
+                            </div>
+                            <div class="bar-label">Sun</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercises -->
+                <div class="exercises-section">
+                    <div class="section-header">
+                        <span style="font-size:22px; font-weight:900;">Today Exercises</span>
+                        <div style="position:relative;">
+                            <button id="add-exercise-btn" class="today-dropdown" style="background:#f0f4f6; color:#12121a; cursor:pointer;">
+                                Add <svg width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div id="exercise-dropdown-menu" class="workout-dropdown" style="right:0; top:45px; width:180px;">
+                                <!-- Population via main.ts -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="exercise-list" style="display:flex; flex-direction:column; gap:16px; flex:1;">
+                        <!-- JS Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── MACRO COL 3 ── -->
+            <div class="col-3">
+                <!-- Training & Steps Combo -->
+                <div class="training-card">
+                    <div class="section-header" style="margin-bottom:8px;">
+                        <span style="font-size:20px; font-weight:900;">Training Days</span>
+                        <div class="month-nav cal-trigger" style="cursor:pointer;">
+                            <button><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polyline points="15 18 9 12 15 6" />
+                                </svg></button>
+                            <span>May</span>
+                            <button><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polyline points="9 18 15 12 9 6" />
+                                </svg></button>
+                        </div>
+                    </div>
+
+                    <div class="cal-row-view">
+                        <!-- JS will populate 7 days here -->
+                    </div>
+
+                    <div class="steps-section">
+                        <div class="steps-hero">
+                            <div class="steps-ring">
+                                <svg viewBox="0 0 36 36">
+                                    <path stroke="#f0f4f6" stroke-width="3" fill="none"
+                                        d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" />
+                                    <path stroke="#7dd4e0" stroke-width="3" fill="none" stroke-linecap="round"
+                                        stroke-dasharray="64, 100" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" />
+                                </svg>
+                                <div class="steps-icon-inner">
+                                    <img src="public/steps.jpg"
+                                        style="width:100%; height:100%; border-radius:50%; object-fit:cover;"
+                                        alt="Steps">
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color:#888; font-size:14px; font-weight:800;">Steps</div>
+                                <div class="hero-steps-val" style="font-size:32px; font-weight:900;">0 <span
+                                        style="font-size:18px; color:#bbb; font-weight:700;">/ 10,000</span></div>
+                            </div>
+                        </div>
+
+                        <div class="steps-metrics">
+                            <div>
+                                <div style="font-size:12px; font-weight:800; color:#aaa; margin-bottom:4px;">Distance
+                                </div>
+                                <div class="steps-dist" style="font-size:20px; font-weight:900;">0</div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:800; color:#aaa; margin-bottom:4px;">Calories
+                                </div>
+                                <div class="steps-kcal" style="font-size:20px; font-weight:900;">0</div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:800; color:#aaa; margin-bottom:4px;">Points
+                                </div>
+                                <div class="steps-pts" style="font-size:20px; font-weight:900;">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wellness -->
+                <div class="wellness-card">
+                    <div class="wellness-top">
+                        <div class="well-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#12121a"
+                                stroke-width="2.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                <line x1="3" y1="9" x2="21" y2="9" />
+                                <line x1="9" y1="21" x2="9" y2="9" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-size:18px; font-weight:900;">Wellness Score</div>
+                            <div style="color:#4caf50; font-weight:800; font-size:13px;">↗ +13%</div>
+                        </div>
+                        <div style="margin-left:auto; display:flex; gap:8px;">
+                            <button
+                                style="width:28px; height:28px; border-radius:50%; background:#f0f4f6; border:none; display:flex; align-items:center; justify-content:center;"><svg
+                                    width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="15 18 9 12 15 6" />
+                                </svg></button>
+                            <button
+                                style="width:28px; height:28px; border-radius:50%; background:#f0f4f6; border:none; display:flex; align-items:center; justify-content:center;"><svg
+                                    width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="9 18 15 12 9 6" />
+                                </svg></button>
+                        </div>
+                    </div>
+
+                    <div class="gauge-area">
+                        <svg viewBox="0 0 160 90" style="width:170px; height:95px;">
+                            <path d="M14 80 A 66 66 0 0 1 146 80" stroke="#f0f4f6" stroke-width="14" fill="none"
+                                stroke-linecap="round" />
+                            <path d="M14 80 A 66 66 0 0 1 146 80" stroke="#8dd8e6" stroke-width="14" fill="none"
+                                stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="65" />
+                        </svg>
+                        <div style="font-size:36px; font-weight:900; line-height:1; margin-top:-14px;">6.1<span
+                                style="font-size:22px; color:#aaa;">/10</span></div>
+                        <div style="font-size:15px; font-weight:800; color:#888; margin-top:4px;">Good!</div>
+                    </div>
+
+                    <div class="profile-strip">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80"
+                            style="width:42px; height:42px; border-radius:50%; object-fit:cover;">
+                        <div style="flex:1;">
+                            <div style="font-size:15px; font-weight:900; color:#12121a;">Riyansh</div>
+                            <div style="font-size:13px; font-weight:700; color:#888;">You are healthier than <b
+                                    style="color:#111;">75%</b> people</div>
+                        </div>
+                        <button
+                            style="background:#f0f4f6; border:none; border-radius:8px; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                            <svg width="16" viewBox="0 0 24 24" fill="none" stroke="#12121a" stroke-width="2.5">
+                                <line x1="5" y1="19" x2="19" y2="5" />
+                                <polyline points="10 5 19 5 19 14" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- APK-style bottom navigation (mobile only) -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="active">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Home
+        </a>
+        <a href="health.html">
+            <svg viewBox="0 0 24 24">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+            Health
+        </a>
+        <a href="exercises.html">
+            <svg viewBox="0 0 24 24">
+                <path d="M20.5 13.5l-7 7a2 2 0 0 1-2.8 0L2 12V2h10l8.5 8.5a2 2 0 0 1 0 2.8z" />
+                <line x1="7" y1="7" x2="7.01" y2="7" />
+            </svg>
+            Exercises
+        </a>
+        <a href="savings.html">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            Savings
+        </a>
+    </nav>
+    <div id="calendar-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Date</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-month-nav month-nav">
+                <button class="prev-m"><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg></button>
+                <span class="m-label">May 2024</span>
+                <button class="next-m"><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg></button>
+            </div>
+            <div class="modal-cal-grid cal-grid">
+                <!-- Grid here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content" style="max-width: 360px;">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h3>Profile Profile</h3>
+                <button class="close-settings"
+                    style="background:#f0f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div>
+                    <label
+                        style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">HEIGHT</label>
+                    <input type="text" id="inp-height"
+                        style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                        placeholder="e.g. 6'0&quot;">
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">MIN
+                            WEIGHT</label>
+                        <input type="number" id="inp-wt-min"
+                            style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                            placeholder="72">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">MAX
+                            WEIGHT</label>
+                        <input type="number" id="inp-wt-max"
+                            style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                            placeholder="82">
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">WATER GOAL
+                        (LITERS)</label>
+                    <input type="number" step="0.1" id="inp-water"
+                        style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                        placeholder="2.0">
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">DAILY STEPS GOAL</label>
+                    <input type="number" id="inp-steps" style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;" placeholder="8000">
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding:16px; background:var(--toggle-bg); border-radius:16px;">
+                    <span style="font-weight:800; font-size:14px; color:var(--text-dark);">Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <button id="save-settings-btn"
+                    style="margin-top:10px;width:100%;padding:16px;background:var(--olive);color:#12121a;border:none;border-radius:16px;font-weight:800;font-size:16px;cursor:pointer;">Save
+                    Global Settings</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div id="notification-center" class="modal">
+        <div class="modal-content notification-modal-content">
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <h3 style="margin:0; font-size:24px; font-weight:900;">Alerts</h3>
+                    <span id="unread-count-pill" class="badge-pill">0</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <button id="mark-all-read" class="text-btn" style="color:#e03070; background:none; border:none; font-weight:800; cursor:pointer; font-size: 14px;">Mark read</button>
+                    <button id="close-notif" class="close-modal">×</button>
+                </div>
+            </div>
+            
+            <div id="notif-list" class="notif-list" style="max-height: 450px; overflow-y: auto;">
+                <!-- Dynamic Items -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+
+</body>
+
+</html>

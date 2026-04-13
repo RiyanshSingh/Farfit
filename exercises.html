@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercises Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
+    <link rel="stylesheet" href="exercises.css">
+</head>
+
+<body>
+
+    <nav>
+        <svg class="logo" viewBox="0 0 52 52" fill="none">
+            <circle cx="26" cy="26" r="25" stroke="#5bbcd6" stroke-width="2"/>
+            <path d="M10 26 Q18 14 26 26 Q34 38 42 26" stroke="#5bbcd6" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M10 30 Q18 18 26 30 Q34 42 42 30" stroke="#a8dce8" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+
+        <div class="nav-links">
+            <a href="index.html">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Home
+            </a>
+            <a href="health.html">
+                <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Health
+            </a>
+            <a href="exercises.html" class="active">
+                <svg viewBox="0 0 24 24"><path d="M20.5 13.5l-7 7a2 2 0 0 1-2.8 0L2 12V2h10l8.5 8.5a2 2 0 0 1 0 2.8z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                Exercises
+            </a>
+
+            <a href="savings.html">
+                <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Savings
+            </a>
+        </div>
+
+        <div class="nav-right">
+            <span class="greeting">Hello, Riyansh 👋</span>
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" class="avatar" alt="User" id="settings-trigger" style="cursor:pointer;" title="Profile Settings">
+            <button class="bell-btn">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="page">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Exercises Center</h1>
+            <div class="header-btns">
+                <button class="date-btn" style="background:var(--olive); color:#12121a;">
+                    <svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    New Workout
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <!-- ── MACRO COL 1 ── -->
+            <div class="col-1">
+                <div class="stats-grid">
+                    
+                    <!-- Active Calories -->
+                    <div class="stats-card">
+                        <div class="cal-top">
+                            <div class="icon-circle orange">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2c0 0-4.5 4-4.5 9a4.5 4.5 0 0 0 9 0c0-5-4.5-9-4.5-9zm0 13.5a2.5 2.5 0 0 1-2.5-2.5c0-1.5 1.5-3 2.5-4 1 1 2.5 2.5 2.5 4a2.5 2.5 0 0 1-2.5 2.5z"/></svg>
+                            </div>
+                            <div class="badge-1d">Today</div>
+                        </div>
+                        <div class="stat-name">Active Burn</div>
+                        <div class="stat-desc">Calories from workout</div>
+                        <div class="stat-val">740 <span>Kcal</span></div>
+                    </div>
+
+                    <!-- Workout Streak -->
+                    <div class="stats-card">
+                        <div class="cal-top">
+                            <div class="icon-circle olive">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            </div>
+                            <div class="badge-height">Fire</div>
+                        </div>
+                        <div class="stat-name">Streak</div>
+                        <div class="stat-desc">Consecutive days</div>
+                        <div class="stat-val">12 <span>Days</span></div>
+                    </div>
+                </div>
+
+                <!-- Live HR Zone -->
+                <div class="hr-zone-card">
+                    <svg class="zone-rings" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="12"/>
+                        <circle cx="50" cy="50" r="20" fill="none" stroke="#fff" stroke-width="12"/>
+                    </svg>
+                    <div class="hr-zone-title">
+                        <div class="pulse-dot"></div> Live HR Zone
+                    </div>
+                    <div class="hr-zone-subtitle">Aerobic (70-80% Max)</div>
+                    <div class="hr-zone-value">138 <span style="font-size:16px; font-weight:700; color:rgba(255,255,255,0.8);">bpm</span></div>
+                </div>
+
+                <!-- Muscle Recovery -->
+                <div class="recovery-card">
+                    <div class="section-header" style="margin-bottom:20px;">
+                        <span style="font-size:20px; font-weight:900;">Muscle Recovery</span>
+                    </div>
+
+                    <div class="muscle-bar-group">
+                        <div class="mb-top">
+                            <span>Chest & Shoulders</span>
+                            <span style="color:#e03070;">30%</span>
+                        </div>
+                        <div class="mb-track"><div class="mb-fill" style="width:30%; background:#e03070;"></div></div>
+                    </div>
+                    <div class="muscle-bar-group">
+                        <div class="mb-top">
+                            <span>Back & Biceps</span>
+                            <span style="color:#f5a623;">75%</span>
+                        </div>
+                        <div class="mb-track"><div class="mb-fill" style="width:75%; background:#f5a623;"></div></div>
+                    </div>
+                    <div class="muscle-bar-group">
+                        <div class="mb-top">
+                            <span>Legs & Core</span>
+                            <span style="color:#4caf50;">90%</span>
+                        </div>
+                        <div class="mb-track"><div class="mb-fill" style="width:90%; background:#4caf50;"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── MACRO COL 2 ── -->
+            <div class="col-2">
+                <!-- Video Player Card -->
+                <div class="video-card">
+                    <div class="section-header">
+                        <span style="font-size:22px; font-weight:900; color:var(--text-dark);">Next Workout</span>
+                        <div class="badge-1d" style="background:var(--bg); color:var(--text-dark);">45 Min</div>
+                    </div>
+
+                    <div class="video-thumbnail">
+                        <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&q=80" alt="Gym Workout">
+                        <div class="play-btn">
+                            <svg width="24" viewBox="0 0 24 24" fill="#12121a"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </div>
+                    </div>
+
+                    <div style="font-size:20px; font-weight:900; margin-bottom:4px; color:var(--text-dark);">HIIT Full Body Crush</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--text-light); margin-bottom:24px;">High intensity interval training with Alex</div>
+
+                    <!-- Routine set list -->
+                    <div class="routine-list">
+                        <div class="set-item">
+                            <div class="set-icon">1</div>
+                            <div class="set-details">
+                                <div style="font-size:16px; font-weight:900; color:var(--text-dark);">Dumbbell Squats</div>
+                                <div style="font-size:12px; font-weight:700; color:var(--text-light);">Quads, Glutes</div>
+                            </div>
+                            <div class="set-box">3 × 12</div>
+                        </div>
+                        <div class="set-item">
+                            <div class="set-icon orange">2</div>
+                            <div class="set-details">
+                                <div style="font-size:16px; font-weight:900; color:var(--text-dark);">Bench Press</div>
+                                <div style="font-size:12px; font-weight:700; color:var(--text-light);">Chest, Triceps</div>
+                            </div>
+                            <div class="set-box">3 × 10</div>
+                        </div>
+                        <div class="set-item">
+                            <div class="set-icon olive">3</div>
+                            <div class="set-details">
+                                <div style="font-size:16px; font-weight:900; color:var(--text-dark);">Pull-ups</div>
+                                <div style="font-size:12px; font-weight:700; color:var(--text-light);">Back, Biceps</div>
+                            </div>
+                            <div class="set-box">3 × 8</div>
+                        </div>
+                        <div class="set-item">
+                            <div class="set-icon orange">4</div>
+                            <div class="set-details">
+                                <div style="font-size:16px; font-weight:900; color:var(--text-dark);">Plank Hold</div>
+                                <div style="font-size:12px; font-weight:700; color:var(--text-light);">Core</div>
+                            </div>
+                            <div class="set-box">3 × 60s</div>
+                        </div>
+                        <div class="set-item" style="margin-top:auto;">
+                            <div class="set-icon" style="background:#e0f2fe; color:#0284c7;">5</div>
+                            <div class="set-details">
+                                <div style="font-size:16px; font-weight:900; color:var(--text-dark);">Mountain Climbers</div>
+                                <div style="font-size:12px; font-weight:700; color:var(--text-light);">Cardio, Core</div>
+                            </div>
+                            <div class="set-box" style="background:#e0f2fe; color:#0284c7;">3 × 45s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── MACRO COL 3 ── -->
+            <div class="col-3">
+                <!-- Training Calendar (Reused from index) -->
+                <div class="card" style="padding-bottom:12px;">
+                    <div class="section-header" style="margin-bottom:8px;">
+                        <span style="font-size:20px; font-weight:900;">Training Log</span>
+                        <div class="month-nav">
+                            <button class="prev-m"><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+                            <span>May</span>
+                            <button class="next-m"><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="cal-grid">
+                        <div class="cal-head">Sun</div><div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div><div class="cal-head">Thr</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div>
+                        <div class="cal-day">3</div>
+                        <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=80&q=80" class="cal-avatar" alt="Wo">
+                        <div class="cal-day">5</div>
+                        <div class="cal-day">6</div>
+                        <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=80&q=80" class="cal-avatar active-ring" alt="Run">
+                        <div class="cal-day">8</div>
+                        <div class="cal-day">9</div>
+                    </div>
+                </div>
+
+                <!-- Personal Records (PRs) -->
+                <div class="pr-card">
+                    <div class="section-header">
+                        <span style="font-size:20px; font-weight:900; color:var(--text-dark);">Personal Records</span>
+                        <svg width="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-dark)" stroke-width="2.5"><path d="M12 15l-3 3-3-3M12 3v15 M21 12H16 M8 12H3"/></svg>
+                    </div>
+
+                    <div class="pr-item">
+                        <div class="pr-name">Deadlift</div>
+                        <div class="pr-val">140 <span>kg</span></div>
+                    </div>
+                    <div class="pr-item">
+                        <div class="pr-name">Squat</div>
+                        <div class="pr-val">110 <span>kg</span></div>
+                    </div>
+                    <div class="pr-item">
+                        <div class="pr-name">Bench Press</div>
+                        <div class="pr-val">85 <span>kg</span></div>
+                    </div>
+                    <div class="pr-item" style="margin-top:auto;">
+                        <div class="pr-name">5K Run</div>
+                        <div class="pr-val">22:30 <span>min</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- APK-style bottom navigation (mobile only) -->
+    <nav class="bottom-nav">
+        <a href="index.html">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+        </a>
+        <a href="health.html">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Health
+        </a>
+        <a href="exercises.html" class="active">
+            <svg viewBox="0 0 24 24"><path d="M20.5 13.5l-7 7a2 2 0 0 1-2.8 0L2 12V2h10l8.5 8.5a2 2 0 0 1 0 2.8z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Exercises
+        </a>
+        <a href="savings.html">
+            <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            Savings
+        </a>
+    </nav>
+
+    <div id="calendar-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Select Date</h3><button class="close-modal">&times;</button></div>
+            <div class="modal-month-nav month-nav"><button class="prev-m"><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button><span class="m-label">May 2024</span><button class="next-m"><svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button></div>
+            <div class="modal-cal-grid cal-grid"></div>
+        </div>
+    </div>
+    <!-- Settings Modal (Universal) -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content" style="max-width: 360px;">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h3 style="font-weight:900;">User Settings</h3>
+                <button class="close-settings"
+                    style="background:#f0f4f6;border:none;border-radius:50%;width:32px;height:32px;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:var(--toggle-bg); border-radius:16px;">
+                    <span style="font-weight:800; font-size:14px; color:var(--text-dark);">Dark Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div style="font-size:12px; color:var(--text-light); text-align:center; padding:10px;">
+                    Other biometrics available on Home Dashboard
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
