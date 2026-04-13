@@ -571,7 +571,6 @@
             align-items: center;
             gap: 16px;
             padding: 16px 0;
-            border-bottom: 1px solid #f0f4f6;
         }
 
         .exercise-item:last-child {
