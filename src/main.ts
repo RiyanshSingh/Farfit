@@ -447,10 +447,10 @@ function updateExercisesUI() {
                 const completed = state.daily[state.viewDate].completed;
                 if(completed.includes(ex.title)) {
                     state.daily[state.viewDate].completed = completed.filter((c:string) => c !== ex.title);
-                    notify('🏃 Exercise Unmarked', `${ex.title} removed from today's log`, 'info');
+                    notify('Exercise Unmarked', `${ex.title} removed from today's log`, 'info');
                 } else {
                     state.daily[state.viewDate].completed = [...completed, ex.title];
-                    notify('💪 Exercise Complete!', `${ex.title} (${ex.time}) — Great work! 🎉`, 'meds');
+                    notify('Exercise Complete!', `${ex.title} (${ex.time})`, 'meds');
                 }
                 updateExercisesUI();
                 sync();
@@ -574,18 +574,25 @@ function updateNotifUI() {
         return;
     }
 
-    list.innerHTML = notifs.map((n:any) => `
-        <div class="notif-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
-            <div class="notif-icon-box ${n.type}">
-                ${n.type === 'alert' ? '☢️' : n.type === 'meds' ? '💊' : '💰'}
+    list.innerHTML = notifs.map((n:any) => {
+        let iconSvg = '';
+        if(n.type === 'alert') iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+        else if(n.type === 'meds') iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
+        else iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M17 7a4 4 0 0 1 0 7.75"/></svg>';
+
+        return `
+            <div class="notif-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
+                <div class="notif-icon-box ${n.type}">
+                    ${iconSvg}
+                </div>
+                <div class="notif-content-area">
+                    <div class="notif-title-text">${n.title}</div>
+                    <div class="notif-message-text">${n.msg}</div>
+                    <div class="notif-timestamp">${n.time}</div>
+                </div>
             </div>
-            <div class="notif-content-area">
-                <div class="notif-title-text">${n.title}</div>
-                <div class="notif-message-text">${n.msg}</div>
-                <div class="notif-timestamp">${n.time}</div>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
     list.querySelectorAll('.notif-item').forEach(item => {
         item.addEventListener('click', () => {
@@ -622,13 +629,13 @@ function init() {
         const w = state.daily[state.viewDate].water;
         updateWaterUI();
         sync();
-        notify(`💧 Water Updated`, `You've logged ${w.toFixed(2)}L today. Goal: ${state.waterGoal}L`, 'meds');
+        notify(`Water Updated`, `You've logged ${w.toFixed(2)}L today. Goal: ${state.waterGoal}L`, 'meds');
     });
     document.querySelector('.wellness-card')?.addEventListener('click', () => {
         state.wellnessScore = (Math.random()*3)+7;
         updateWellnessUI();
         sync();
-        notify('📊 Wellness Recalculated', `Your wellness score is now ${state.wellnessScore.toFixed(1)}/10`, 'info');
+        notify('Wellness Recalculated', `Your wellness score is now ${state.wellnessScore.toFixed(1)}/10`, 'info');
     });
     
     // Interactions
@@ -640,11 +647,11 @@ function init() {
                 const name = card.querySelector('.stat-name')?.textContent || "";
                 if (state.viewDate && state.daily[state.viewDate]) {
                     const d = state.daily[state.viewDate];
-                    if (name === "Weight") { const v = await healthianPrompt("Weight (kg):", d.weight.toString()); if(v){d.weight=parseFloat(v); renderAll(); sync(); notify('⚖️ Weight Updated', `Logged ${parseFloat(v)}kg. Healthy range: ${state.weightMin}-${state.weightMax}kg`, 'alert');} }
-                    if (name === "Glucose") { const v = await healthianPrompt("Glucose (mg/dl):", d.glucose.toString()); if(v){d.glucose=parseFloat(v); renderAll(); sync(); const g=parseFloat(v); notify('🩸 Glucose Updated', `${g} mg/dl — ${g<54?'Too Low ⚠️':g>62?'Slightly High':'Normal ✅'}`, g>120?'alert':'meds');} }
-                    if (name === "Blood Pressure") { const sys = await healthianPrompt("Systolic:", d.bp_sys.toString()); const dia = await healthianPrompt("Diastolic:", d.bp_dia.toString()); if(sys && dia){d.bp_sys=parseInt(sys); d.bp_dia=parseInt(dia); renderAll(); sync(); notify('🫀 BP Updated', `${sys}/${dia} mmHg — ${parseInt(sys)>140?'High BP ⚠️':'Looking good ✅'}`, parseInt(sys)>140?'alert':'meds');} }
-                    if (name === "Blood Oxygen") { const v = await healthianPrompt("SpO2 %:", d.spo2.toString()); if(v){d.spo2=parseInt(v); renderAll(); sync(); const o=parseInt(v); notify('🫁 SpO2 Updated', `${o}% — ${o<95?'Low — consider rest ⚠️':'Normal ✅'}`, o<95?'alert':'meds');} }
-                    if (name === "Body Temp") { const v = await healthianPrompt("Temp °F:", d.temp.toString()); if(v){d.temp=parseFloat(v); renderAll(); sync(); const t=parseFloat(v); notify('🌡️ Temperature Updated', `${t}°F — ${t>99.5?'Elevated ⚠️':'Normal ✅'}`, t>99.5?'alert':'meds');} }
+                    if (name === "Weight") { const v = await healthianPrompt("Weight (kg):", d.weight.toString()); if(v){d.weight=parseFloat(v); renderAll(); sync(); notify('Weight Updated', `Logged ${parseFloat(v)}kg. Healthy range: ${state.weightMin}-${state.weightMax}kg`, 'alert');} }
+                    if (name === "Glucose") { const v = await healthianPrompt("Glucose (mg/dl):", d.glucose.toString()); if(v){d.glucose=parseFloat(v); renderAll(); sync(); const g=parseFloat(v); notify('Glucose Updated', `${g} mg/dl — ${g<54?'Too Low':g>62?'Slightly High':'Normal'}`, g>120?'alert':'meds');} }
+                    if (name === "Blood Pressure") { const sys = await healthianPrompt("Systolic:", d.bp_sys.toString()); const dia = await healthianPrompt("Diastolic:", d.bp_dia.toString()); if(sys && dia){d.bp_sys=parseInt(sys); d.bp_dia=parseInt(dia); renderAll(); sync(); notify('BP Updated', `${sys}/${dia} mmHg — ${parseInt(sys)>140?'High BP':'Looking good'}`, parseInt(sys)>140?'alert':'meds');} }
+                    if (name === "Blood Oxygen") { const v = await healthianPrompt("SpO2 %:", d.spo2.toString()); if(v){d.spo2=parseInt(v); renderAll(); sync(); const o=parseInt(v); notify('SpO2 Updated', `${o}% — ${o<95?'Low — consider rest':'Normal'}`, o<95?'alert':'meds');} }
+                    if (name === "Body Temp") { const v = await healthianPrompt("Temp °F:", d.temp.toString()); if(v){d.temp=parseFloat(v); renderAll(); sync(); const t=parseFloat(v); notify('Temperature Updated', `${t}°F — ${t>99.5?'Elevated':'Normal'}`, t>99.5?'alert':'meds');} }
                 }
             }
             
@@ -654,30 +661,30 @@ function init() {
                 const c = await healthianPrompt("Carbs (g):", d.carbs.toString()); 
                 const p = await healthianPrompt("Protein (g):", d.protein.toString()); 
                 const f = await healthianPrompt("Fat (g):", d.fat.toString());
-                if(c && p && f){ d.carbs=parseInt(c); d.protein=parseInt(p); d.fat=parseInt(f); renderAll(); sync(); notify('🥗 Macros Updated', `Carbs: ${c}g | Protein: ${p}g | Fat: ${f}g`, 'info'); }
+                if(c && p && f){ d.carbs=parseInt(c); d.protein=parseInt(p); d.fat=parseInt(f); renderAll(); sync(); notify('Macros Updated', `Carbs: ${c}g | Protein: ${p}g | Fat: ${f}g`, 'info'); }
             }
 
         const prItem = target.closest('.pr-item');
         if (prItem) {
             const name = prItem.querySelector('.pr-name')?.textContent || "";
-            if (name === "Deadlift") { const v = await healthianPrompt("Deadlift PR (kg):", state.prs.deadlift.toString()); if(v){state.prs.deadlift=parseInt(v); renderAll(); sync(); notify('🏋️ New PR!', `Deadlift: ${v}kg — Personal Record logged!`, 'info');} }
-            if (name === "Squat") { const v = await healthianPrompt("Squat PR (kg):", state.prs.squat.toString()); if(v){state.prs.squat=parseInt(v); renderAll(); sync(); notify('🏋️ New PR!', `Squat: ${v}kg — Personal Record logged!`, 'info');} }
-            if (name === "Bench Press") { const v = await healthianPrompt("Bench PR (kg):", state.prs.bench.toString()); if(v){state.prs.bench=parseInt(v); renderAll(); sync(); notify('🏋️ New PR!', `Bench Press: ${v}kg — Personal Record logged!`, 'info');} }
-            if (name === "5K Run") { const v = await healthianPrompt("5K Run PR (min):", state.prs.run); if(v){state.prs.run=v; renderAll(); sync(); notify('🏃 New PR!', `5K Run: ${v} min — Personal Record logged!`, 'info');} }
+            if (name === "Deadlift") { const v = await healthianPrompt("Deadlift PR (kg):", state.prs.deadlift.toString()); if(v){state.prs.deadlift=parseInt(v); renderAll(); sync(); notify('New PR!', `Deadlift: ${v}kg`, 'info');} }
+            if (name === "Squat") { const v = await healthianPrompt("Squat PR (kg):", state.prs.squat.toString()); if(v){state.prs.squat=parseInt(v); renderAll(); sync(); notify('New PR!', `Squat: ${v}kg`, 'info');} }
+            if (name === "Bench Press") { const v = await healthianPrompt("Bench PR (kg):", state.prs.bench.toString()); if(v){state.prs.bench=parseInt(v); renderAll(); sync(); notify('New PR!', `Bench Press: ${v}kg`, 'info');} }
+            if (name === "5K Run") { const v = await healthianPrompt("5K Run PR (min):", state.prs.run); if(v){state.prs.run=v; renderAll(); sync(); notify('New PR!', `5K Run: ${v} min`, 'info');} }
         }
 
         const muscleGroup = target.closest('.muscle-bar-group');
         if (muscleGroup) {
             const name = muscleGroup.querySelector('.mb-top span:first-child')?.textContent || "";
-            if (name.includes("Chest")) { const v = await healthianPrompt("Chest Recovery %:", state.muscles.chest.toString()); if(v){state.muscles.chest=parseInt(v); renderAll(); sync(); notify('💪 Muscle Updated', `Chest recovery: ${v}%`, 'meds');} }
-            if (name.includes("Back")) { const v = await healthianPrompt("Back Recovery %:", state.muscles.back.toString()); if(v){state.muscles.back=parseInt(v); renderAll(); sync(); notify('💪 Muscle Updated', `Back recovery: ${v}%`, 'meds');} }
-            if (name.includes("Legs")) { const v = await healthianPrompt("Legs Recovery %:", state.muscles.legs.toString()); if(v){state.muscles.legs=parseInt(v); renderAll(); sync(); notify('💪 Muscle Updated', `Legs recovery: ${v}%`, 'meds');} }
+            if (name.includes("Chest")) { const v = await healthianPrompt("Chest Recovery %:", state.muscles.chest.toString()); if(v){state.muscles.chest=parseInt(v); renderAll(); sync(); notify('Muscle Updated', `Chest recovery: ${v}%`, 'meds');} }
+            if (name.includes("Back")) { const v = await healthianPrompt("Back Recovery %:", state.muscles.back.toString()); if(v){state.muscles.back=parseInt(v); renderAll(); sync(); notify('Muscle Updated', `Back recovery: ${v}%`, 'meds');} }
+            if (name.includes("Legs")) { const v = await healthianPrompt("Legs Recovery %:", state.muscles.legs.toString()); if(v){state.muscles.legs=parseInt(v); renderAll(); sync(); notify('Muscle Updated', `Legs recovery: ${v}%`, 'meds');} }
         }
         
         const streakCard = target.closest('.col-1 .stats-grid .stats-card');
         if (streakCard) {
             const name = streakCard.querySelector('.stat-name')?.textContent || "";
-            if (name === "Streak") { const v = await healthianPrompt("Workout Streak (Days):", state.streak.toString()); if(v){state.streak=parseInt(v); renderAll(); sync(); notify('🔥 Streak Updated', `Your workout streak is now ${v} days — Keep it up!`, 'info');} }
+            if (name === "Streak") { const v = await healthianPrompt("Workout Streak (Days):", state.streak.toString()); if(v){state.streak=parseInt(v); renderAll(); sync(); notify('Streak Updated', `Your workout streak is now ${v} days`, 'info');} }
         }
     });
     (window as any)._mainDocClickBound = true;
@@ -744,7 +751,7 @@ function init() {
         renderAll();
         sync();
         showToast("Settings Updated Globally", false);
-        notify('⚙️ Settings Saved', `Goals updated — Steps: ${state.stepsGoal.toLocaleString()}, Water: ${state.waterGoal}L`, 'info');
+        notify('Settings Saved', `Goals updated — Steps: ${state.stepsGoal.toLocaleString()}, Water: ${state.waterGoal}L`, 'info');
     });
 
     document.querySelector('.next-m')?.addEventListener('click', () => { state.viewMonth++; if(state.viewMonth>11){state.viewMonth=0; state.viewYear++;} renderModalCalendar(); });
@@ -781,10 +788,10 @@ function init() {
         const meds = state.daily[state.viewDate].meds;
         if (meds.includes(name)) {
             state.daily[state.viewDate].meds = meds.filter((m: string) => m !== name);
-            notify('💊 Medication Unmarked', `${name} marked as not taken`, 'meds');
+            notify('Medication Unmarked', `${name} marked as not taken`, 'meds');
         } else {
             state.daily[state.viewDate].meds = [...meds, name];
-            notify('💊 Medication Taken', `${name} logged as taken ✅`, 'meds');
+            notify('Medication Taken', `${name} logged as taken`, 'meds');
         }
         updateHealthPageUI();
         sync();
