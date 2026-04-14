@@ -65,12 +65,6 @@
             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" 
                 class="avatar" alt="User" id="settings-trigger" style="cursor:pointer;" title="Profile Settings">
             <div style="position:relative; display:flex; align-items:center; gap:12px;">
-                <button class="search-trigger-btn" id="search-trigger" title="Search (Cmd + K)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
                 <button class="bell-btn" id="bell-trigger">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -87,7 +81,7 @@
         <div class="dashboard-header">
             <h1>Exercises Center</h1>
             <div class="header-btns">
-                <button class="date-btn" style="background:var(--olive); color:#12121a;">
+                <button id="new-workout-btn" class="date-btn" style="background:var(--olive); color:#12121a;">
                     <svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                     New Workout
                 </button>
@@ -173,21 +167,21 @@
             <!-- ── MACRO COL 2 ── -->
             <div class="col-2">
                 <!-- Video Player Card -->
-                <div class="video-card">
+                <div id="featured-workout-card" class="video-card">
                     <div class="section-header">
                         <span style="font-size:22px; font-weight:900; color:var(--text-dark);">Next Workout</span>
-                        <div class="badge-1d" style="background:var(--bg); color:var(--text-dark);">45 Min</div>
+                        <div id="featured-workout-duration" class="badge-1d" style="background:var(--bg); color:var(--text-dark);">45 Min</div>
                     </div>
 
                     <div class="video-thumbnail">
-                        <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&q=80" alt="Gym Workout">
-                        <div class="play-btn">
+                        <img id="featured-workout-image" src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&q=80" alt="Gym Workout">
+                        <div id="featured-workout-play" class="play-btn" role="button" tabindex="0" aria-label="Play featured workout">
                             <svg width="24" viewBox="0 0 24 24" fill="#12121a"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         </div>
                     </div>
 
-                    <div style="font-size:20px; font-weight:900; margin-bottom:4px; color:var(--text-dark);">HIIT Full Body Crush</div>
-                    <div style="font-size:13px; font-weight:600; color:var(--text-light); margin-bottom:24px;">High intensity interval training with Alex</div>
+                    <div id="featured-workout-title" style="font-size:20px; font-weight:900; margin-bottom:4px; color:var(--text-dark);">HIIT Full Body Crush</div>
+                    <div id="featured-workout-desc" style="font-size:13px; font-weight:600; color:var(--text-light); margin-bottom:24px;">High intensity interval training with Alex</div>
 
                     <!-- Routine set list -->
                     <div class="routine-list">
@@ -330,6 +324,29 @@
                     <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">USER HEIGHT</label>
                     <input type="text" id="inp-height" style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;" placeholder="6'0&quot;">
                 </div>
+                <div style="display:flex; gap:16px;">
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">MIN
+                            WEIGHT</label>
+                        <input type="number" id="inp-wt-min"
+                            style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                            placeholder="72">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">MAX
+                            WEIGHT</label>
+                        <input type="number" id="inp-wt-max"
+                            style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                            placeholder="82">
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">WATER GOAL
+                        (LITERS)</label>
+                    <input type="number" step="0.1" id="inp-water"
+                        style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                        placeholder="2.0">
+                </div>
                 <div>
                     <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">DAILY STEPS GOAL</label>
                     <input type="number" id="inp-steps" style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;" placeholder="8000">
@@ -367,26 +384,6 @@
         </div>
     </div>
 
-    <!-- Skeleton Search -->
-    <div id="search-modal" class="modal search-modal">
-        <div class="modal-content search-modal-content">
-            <div class="search-input-wrapper">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="search-icon-inside">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" id="global-search-input" placeholder="Search pages, actions, or metrics... (Esc to close)" autocomplete="off">
-            </div>
-            <div id="search-results" class="search-results-list">
-                <div class="search-hint">Try typing "water", "health", or "dark mode"</div>
-            </div>
-            <div class="search-footer">
-                <span><kbd>↑↓</kbd> to navigate</span>
-                <span><kbd>Enter</kbd> to select</span>
-                <span><kbd>Esc</kbd> to close</span>
-            </div>
-        </div>
-    </div>
 
     <script type="module" src="/src/main.ts"></script>
 </body>

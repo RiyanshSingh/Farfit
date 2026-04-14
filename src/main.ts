@@ -164,6 +164,179 @@ async function load() {
 
 function ensure(d: string) { if (!state.daily[d]) state.daily[d] = de(); }
 
+function getWorkoutForDate(dateStr: string = state.viewDate) {
+    ensure(dateStr);
+    const currentDate = new Date(dateStr);
+    const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+    return state.daily[dateStr]?.manualExercise || masterRoutine[dayName] || workoutLibrary[0];
+}
+
+function getWorkoutMinutes(workout: any): number {
+    const match = String(workout?.time || '').match(/(\d+)/);
+    return match ? parseInt(match[1], 10) : 20;
+}
+
+function deriveWorkoutIndex(workout: any): number {
+    const label = `${workout?.title || ''} ${workout?.desc || ''}`.toLowerCase();
+    if (label.includes('yoga')) return 7;
+    if (label.includes('recovery') || label.includes('walk') || label.includes('stretch')) return 8;
+    if (label.includes('core')) return 6;
+    if (label.includes('squat') || label.includes('lower') || label.includes('leg')) return 4;
+    if (label.includes('upper') || label.includes('bench') || label.includes('push')) return 5;
+    if (label.includes('burpee')) return 3;
+    if (label.includes('run') || label.includes('sprint') || label.includes('hiit') || label.includes('cardio')) return 2;
+    if (label.includes('jump')) return 1;
+    return 0;
+}
+
+function updateFeaturedWorkoutCard() {
+    if (!location.pathname.includes('exercises')) return;
+
+    const workout = getWorkoutForDate();
+    const titleEl = document.getElementById('featured-workout-title');
+    const descEl = document.getElementById('featured-workout-desc');
+    const imageEl = document.getElementById('featured-workout-image') as HTMLImageElement | null;
+    const durationEl = document.getElementById('featured-workout-duration');
+    const playEl = document.getElementById('featured-workout-play');
+    const isCurrentWorkout = state.workoutExIdx === deriveWorkoutIndex(workout);
+    const isPlaying = isCurrentWorkout && state.workoutRunning;
+
+    if (titleEl) titleEl.textContent = workout.title;
+    if (descEl) {
+        descEl.textContent = isPlaying
+            ? `${workout.desc} Session live now.`
+            : workout.desc;
+    }
+    if (imageEl) {
+        imageEl.src = workout.img;
+        imageEl.alt = workout.title;
+    }
+    if (durationEl) {
+        durationEl.textContent = isPlaying ? `Live ${formatTime(state.workoutTimer)}` : workout.time;
+    }
+    if (playEl) {
+        playEl.innerHTML = isPlaying
+            ? '<svg width="24" viewBox="0 0 24 24" fill="#12121a"><rect x="6" y="5" width="4" height="14" rx="1.5"></rect><rect x="14" y="5" width="4" height="14" rx="1.5"></rect></svg>'
+            : '<svg width="24" viewBox="0 0 24 24" fill="#12121a"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+        playEl.setAttribute('aria-label', isPlaying ? `Pause ${workout.title}` : `Play ${workout.title}`);
+        playEl.setAttribute('title', isPlaying ? `Pause ${workout.title}` : `Start ${workout.title}`);
+    }
+}
+
+function downloadTextFile(filename: string, content: string) {
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+function exportHealthReport() {
+    ensure(state.viewDate);
+    const d = state.daily[state.viewDate];
+    const reportDate = new Date(state.viewDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    const symptoms = (d.symptoms || []).length
+        ? d.symptoms.map((item: any) => `${item.time} - ${item.title}: ${item.desc || 'No notes'}`).join('\n')
+        : 'None logged';
+    const meds = (d.meds || []).length ? d.meds.join(', ') : 'None logged';
+    const report = [
+        'Healthian Daily Health Report',
+        `Date: ${reportDate}`,
+        '',
+        'Vitals',
+        `- Blood Pressure: ${d.bp_sys}/${d.bp_dia} mmHg`,
+        `- SpO2: ${d.spo2}%`,
+        `- Temperature: ${d.temp} F`,
+        `- Heart Rate: ${state.heartRate} bpm`,
+        `- Wellness Score: ${state.wellnessScore.toFixed(1)}/10`,
+        '',
+        'Activity',
+        `- Steps: ${d.steps.toLocaleString()} / ${state.stepsGoal.toLocaleString()}`,
+        `- Water: ${d.water.toFixed(1)}L / ${state.waterGoal}L`,
+        `- Active Workout: ${getWorkoutForDate().title}`,
+        `- Workout Streak: ${state.streak} days`,
+        '',
+        'Nutrition',
+        `- Weight: ${d.weight.toFixed(1)} kg`,
+        `- Glucose: ${d.glucose} mg/dl`,
+        `- Macros: ${d.carbs}g carbs, ${d.protein}g protein, ${d.fat}g fat`,
+        '',
+        'Recovery',
+        `- Sleep: ${d.sleep_h}h ${d.sleep_m}m`,
+        `- Medications Taken: ${meds}`,
+        '',
+        'Symptoms',
+        symptoms
+    ].join('\n');
+
+    downloadTextFile(`healthian-report-${state.viewDate}.txt`, report);
+    showToast('Health report exported', false);
+    notify('Report Ready', `Downloaded your ${state.viewDate} summary.`, 'info');
+}
+
+async function createWorkoutFromPrompt() {
+    const currentWorkout = getWorkoutForDate();
+    const title = await healthianPrompt('Workout name:', currentWorkout.title);
+    if (!title) return;
+
+    const minutesInput = await healthianPrompt('Duration (minutes):', getWorkoutMinutes(currentWorkout).toString());
+    if (!minutesInput) return;
+
+    const focus = await healthianPrompt('Focus / notes:', currentWorkout.desc);
+    if (focus === null) return;
+
+    const minutes = Math.max(parseInt(minutesInput, 10) || getWorkoutMinutes(currentWorkout), 5);
+    const workout = {
+        title: title.trim() || currentWorkout.title,
+        desc: focus.trim() || 'Custom workout session.',
+        time: `${minutes} min`,
+        img: currentWorkout.img || workoutLibrary[0].img
+    };
+
+    ensure(state.viewDate);
+    state.daily[state.viewDate].manualExercise = workout;
+    state.workoutExIdx = deriveWorkoutIndex(workout);
+    state.workoutTimer = 0;
+    state.workoutRunning = false;
+    renderAll();
+    sync();
+    showToast(`Workout ready: ${workout.title}`, false);
+    notify('Workout Scheduled', `${workout.title} added for ${workout.time}.`, 'info');
+}
+
+function toggleFeaturedWorkoutPlayback() {
+    const workout = getWorkoutForDate();
+    const workoutIndex = deriveWorkoutIndex(workout);
+    const isCurrentWorkout = state.workoutExIdx === workoutIndex;
+    const wasRunning = isCurrentWorkout && state.workoutRunning;
+
+    ensure(state.viewDate);
+    state.daily[state.viewDate].manualExercise = workout;
+    state.workoutExIdx = workoutIndex;
+    if (!isCurrentWorkout) state.workoutTimer = 0;
+    state.workoutRunning = !wasRunning;
+
+    renderWorkoutUI();
+    updateFeaturedWorkoutCard();
+    sync();
+
+    if (state.workoutRunning) {
+        showToast(`Workout started: ${workout.title}`, false);
+        notify('Workout Started', `${workout.title} is now in progress.`, 'meds');
+    } else {
+        showToast(`Workout paused: ${workout.title}`, false);
+        notify('Workout Paused', `${workout.title} paused at ${formatTime(state.workoutTimer)}.`, 'info');
+    }
+}
+
 function renderAll() {
     ensure(state.viewDate);
     updateWaterUI(); updateStepsUI(); updateWellnessUI(); updateExercisesUI(); updateChartUI(); updateHeartUI(); renderWorkoutUI(); updateOtherStatsUI();
@@ -343,6 +516,8 @@ function updateExercisesPageUI() {
         const benchEl = prItems[2].querySelector('.pr-val'); if(benchEl) benchEl.innerHTML = `${state.prs.bench} <span>kg</span>`;
         const runEl = prItems[3].querySelector('.pr-val'); if(runEl) runEl.innerHTML = `${state.prs.run} <span>min</span>`;
     }
+
+    updateFeaturedWorkoutCard();
 }
 
 function updateChartUI() {
@@ -540,7 +715,6 @@ function renderModalCalendar() {
 }
 
 async function notify(title:string, msg:string, type:string = 'alert') {
-    ensure(state.viewDate);
     const notif = {
         id: Date.now(),
         title,
@@ -549,23 +723,24 @@ async function notify(title:string, msg:string, type:string = 'alert') {
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         read: false
     };
-    if(!state.daily[state.viewDate].notifications) state.daily[state.viewDate].notifications = [];
-    state.daily[state.viewDate].notifications.unshift(notif);
+    
+    const globalRaw = localStorage.getItem('healthian_global_notifs');
+    const notifs = globalRaw ? JSON.parse(globalRaw) : [];
+    notifs.unshift(notif);
+    localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs.slice(0, 50))); // Keep last 50
+    
     updateNotifUI();
     showToast(title, false);
-    sync();
 }
 
 function updateNotifUI() {
-    const d = state.daily[state.viewDate];
-    const panel = document.getElementById('notification-center');
-    const backdrop = document.getElementById('notif-backdrop');
     const list = document.getElementById('notif-list');
     const badge = document.getElementById('unread-count');
     const pill = document.getElementById('unread-count-pill');
-    if(!list || !d) return;
+    if(!list) return;
 
-    const notifs = d.notifications || [];
+    const globalRaw = localStorage.getItem('healthian_global_notifs');
+    const notifs = globalRaw ? JSON.parse(globalRaw) : [];
     const unreadCount = notifs.filter((n:any) => !n.read).length;
 
     if(badge) {
@@ -718,11 +893,11 @@ function init() {
     }
 
     document.getElementById('mark-all-read')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        ensure(state.viewDate);
-        state.daily[state.viewDate].notifications?.forEach((n:any) => n.read = true);
+        const globalRaw = localStorage.getItem('healthian_global_notifs');
+        let notifs = globalRaw ? JSON.parse(globalRaw) : [];
+        notifs.forEach((n:any) => n.read = true);
+        localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs));
         updateNotifUI();
-        sync();
     });
 
     // Mock welcome
@@ -735,22 +910,35 @@ function init() {
     
     // Settings Binding
     document.getElementById('settings-trigger')?.addEventListener('click', () => {
-        (document.getElementById('inp-height') as HTMLInputElement).value = state.height;
-        (document.getElementById('inp-wt-min') as HTMLInputElement).value = state.weightMin.toString();
-        (document.getElementById('inp-wt-max') as HTMLInputElement).value = state.weightMax.toString();
-        (document.getElementById('inp-water') as HTMLInputElement).value = state.waterGoal.toString();
-        (document.getElementById('inp-steps') as HTMLInputElement).value = state.stepsGoal.toString();
+        const h = document.getElementById('inp-height') as HTMLInputElement;
+        const wm = document.getElementById('inp-wt-min') as HTMLInputElement;
+        const wx = document.getElementById('inp-wt-max') as HTMLInputElement;
+        const w = document.getElementById('inp-water') as HTMLInputElement;
+        const s = document.getElementById('inp-steps') as HTMLInputElement;
+
+        if (h) h.value = state.height;
+        if (wm) wm.value = state.weightMin.toString();
+        if (wx) wx.value = state.weightMax.toString();
+        if (w) w.value = state.waterGoal.toString();
+        if (s) s.value = state.stepsGoal.toString();
+        
         document.getElementById('settings-modal')?.classList.add('show');
     });
     
     document.querySelector('.close-settings')?.addEventListener('click', () => document.getElementById('settings-modal')?.classList.remove('show'));
     
     document.getElementById('save-settings-btn')?.addEventListener('click', () => {
-        state.height = (document.getElementById('inp-height') as HTMLInputElement).value || state.height;
-        state.weightMin = parseFloat((document.getElementById('inp-wt-min') as HTMLInputElement).value) || state.weightMin;
-        state.weightMax = parseFloat((document.getElementById('inp-wt-max') as HTMLInputElement).value) || state.weightMax;
-        state.waterGoal = parseFloat((document.getElementById('inp-water') as HTMLInputElement).value) || state.waterGoal;
-        state.stepsGoal = parseFloat((document.getElementById('inp-steps') as HTMLInputElement).value) || state.stepsGoal;
+        const h = document.getElementById('inp-height') as HTMLInputElement;
+        const wm = document.getElementById('inp-wt-min') as HTMLInputElement;
+        const wx = document.getElementById('inp-wt-max') as HTMLInputElement;
+        const w = document.getElementById('inp-water') as HTMLInputElement;
+        const s = document.getElementById('inp-steps') as HTMLInputElement;
+
+        if (h) state.height = h.value || state.height;
+        if (wm) state.weightMin = parseFloat(wm.value) || state.weightMin;
+        if (wx) state.weightMax = parseFloat(wx.value) || state.weightMax;
+        if (w) state.waterGoal = parseFloat(w.value) || state.waterGoal;
+        if (s) state.stepsGoal = parseFloat(s.value) || state.stepsGoal;
         
         document.getElementById('settings-modal')?.classList.remove('show');
         renderAll();
@@ -847,12 +1035,14 @@ function init() {
     setInterval(() => {
         if (state.workoutRunning) {
             state.workoutTimer++; if (state.workoutTimer >= 1800) { state.workoutTimer = 0; state.workoutExIdx = (state.workoutExIdx+1)%exList.length; }
-            renderWorkoutUI(); if (state.workoutTimer % 5 === 0) sync();
+            renderWorkoutUI();
+            updateFeaturedWorkoutCard();
+            if (state.workoutTimer % 5 === 0) sync();
         }
     }, 1000);
 
     document.querySelector('.cardio-btn')?.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).closest('.pause-icon')) { e.stopPropagation(); state.workoutRunning = !state.workoutRunning; renderWorkoutUI(); sync(); return; }
+        if ((e.target as HTMLElement).closest('.pause-icon')) { e.stopPropagation(); state.workoutRunning = !state.workoutRunning; renderWorkoutUI(); updateFeaturedWorkoutCard(); sync(); return; }
         document.querySelector('.workout-dropdown')?.classList.toggle('show');
     });
 
@@ -869,6 +1059,17 @@ function init() {
     const exTrigger = document.getElementById('add-exercise-btn');
     const exMenu = document.getElementById('exercise-dropdown-menu');
     exTrigger?.addEventListener('click', () => exMenu?.classList.toggle('show'));
+    document.getElementById('new-workout-btn')?.addEventListener('click', createWorkoutFromPrompt);
+    document.getElementById('export-report-btn')?.addEventListener('click', exportHealthReport);
+
+    const featuredPlayBtn = document.getElementById('featured-workout-play');
+    featuredPlayBtn?.addEventListener('click', toggleFeaturedWorkoutPlayback);
+    featuredPlayBtn?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleFeaturedWorkoutPlayback();
+        }
+    });
     
     if (exMenu) {
         workoutLibrary.forEach(ex => {
@@ -878,7 +1079,10 @@ function init() {
             div.onclick = () => {
                 ensure(state.viewDate);
                 state.daily[state.viewDate].manualExercise = ex;
-                updateExercisesUI();
+                state.workoutExIdx = deriveWorkoutIndex(ex);
+                state.workoutTimer = 0;
+                state.workoutRunning = false;
+                renderAll();
                 sync();
                 exMenu.classList.remove('show');
                 showToast(`Switched to ${ex.title}`, false);

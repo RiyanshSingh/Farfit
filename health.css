@@ -82,17 +82,27 @@
     align-items: center;
     gap: 16px;
     padding: 16px 0;
-    border-bottom: 1px solid #f0f4f6;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
+
+[data-theme="dark"] .med-item {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
 .med-item:last-child { border-bottom: none; }
-.med-time { font-weight: 800; font-size: 14px; color: #12121a; width: 45px; }
+.med-time { font-weight: 800; font-size: 14px; color: var(--text-dark); width: 45px; }
 .med-icon {
     width: 44px; height: 44px; border-radius: 14px;
-    background: #f0f4f6;
+    background: rgba(120, 150, 180, 0.1);
     display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] .med-icon {
+    background: rgba(255, 255, 255, 0.05);
 }
 .med-info { flex: 1; }
-.med-name { font-weight: 900; font-size: 16px; color: #12121a; margin-bottom: 2px;}
+.med-name { font-weight: 900; font-size: 16px; color: var(--text-dark); margin-bottom: 2px;}
 .med-desc { font-weight: 600; font-size: 12px; color: var(--text-light); }
 
 /* Appointments */
@@ -100,10 +110,34 @@
     background: var(--blue-card);
     border-radius: var(--radius);
     padding: 24px;
-    color: #12121a;
+    color: var(--text-dark);
 }
 .appt-doc {
     display: flex; align-items: center; gap: 14px; margin-top: 16px;
 }
 .doc-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
 .doc-info { flex: 1; }
+
+.appt-subtitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4a6a7e; 
+}
+
+[data-theme="dark"] .appt-subtitle {
+    color: var(--text-mid); 
+}
+
+.appt-pill {
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+[data-theme="dark"] .appt-pill {
+    background: rgba(255, 255, 255, 0.1);
+}

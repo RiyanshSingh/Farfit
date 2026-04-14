@@ -66,12 +66,6 @@
             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80" 
                 class="avatar" alt="User" id="settings-trigger" style="cursor:pointer;" title="Profile Settings">
             <div style="position:relative; display:flex; align-items:center; gap:12px;">
-                <button class="search-trigger-btn" id="search-trigger" title="Search (Cmd + K)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
                 <button class="bell-btn" id="bell-trigger">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -88,7 +82,7 @@
         <div class="dashboard-header">
             <h1>Health Analytics</h1>
             <div class="header-btns">
-                <button class="date-btn" style="background:var(--blue-card); color:#12121a;">
+                <button id="export-report-btn" class="date-btn" style="background:var(--blue-dark); color:#fff;">
                     <svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Export Report 
                 </button>
@@ -251,20 +245,20 @@
                         <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=100&q=80" class="doc-img" alt="Doctor">
                         <div class="doc-info">
                             <div style="font-size:16px; font-weight:900;">Dr. Gregory House</div>
-                            <div style="font-size:13px; color:#3a5a6e; font-weight:700;">Cardiology Specialist</div>
+                            <div class="appt-subtitle">Cardiology Specialist</div>
                         </div>
                         <button style="width:36px; height:36px; border-radius:50%; background:#12121a; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">
                             <svg width="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </button>
                     </div>
-                    <div style="margin-top: 20px; background: rgba(255,255,255,0.4); border-radius: 12px; padding: 12px; display:flex; gap:12px; align-items:center;">
+                    <div class="appt-pill">
                          <div style="width:42px; height:42px; background:#fff; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                              <span style="font-size:10px; font-weight:800; color:#e03070; text-transform:uppercase;">May</span>
-                             <span style="font-size:15px; font-weight:900; line-height:1;">24</span>
+                             <span style="font-size:15px; font-weight:900; line-height:1; color:#12121a;">24</span>
                          </div>
                          <div>
                              <div style="font-size:14px; font-weight:800;">10:00 AM - 10:45 AM</div>
-                             <div style="font-size:12px; font-weight:700; color:#3a5a6e; margin-top:2px;">City Medical Center</div>
+                             <div class="appt-subtitle" style="margin-top:2px;">City Medical Center</div>
                          </div>
                     </div>
                 </div>
@@ -273,7 +267,7 @@
                 <div class="meds-card">
                     <div class="section-header">
                         <span style="font-size:20px; font-weight:900;">Medication Plan</span>
-                        <span style="font-size:14px; font-weight:800; color:#888;">2/3 Taken</span>
+                        <span style="font-size:14px; font-weight:800; color:var(--text-light);">2/3 Taken</span>
                     </div>
 
                     <div class="med-item">
@@ -301,12 +295,12 @@
                     </div>
 
                     <div class="med-item" style="margin-top:auto;">
-                        <div class="med-time" style="color:#aaa;">21:00</div>
+                        <div class="med-time" style="color:var(--text-light);">21:00</div>
                         <div class="med-icon" style="background:#f3f4f6; color:#9ca3af;">
                             <svg width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.5 20.5 4 14l10-10 6.5 6.5-10 10Z"/><path d="m14 6-6 6"/></svg>
                         </div>
                         <div class="med-info">
-                            <div class="med-name" style="color:#888;">Magnesium Zn</div>
+                            <div class="med-name" style="color:var(--text-light);">Magnesium Zn</div>
                             <div class="med-desc">400mg · Before bed</div>
                         </div>
                         <div class="check-btn outline"><svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -384,6 +378,29 @@
                     <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">USER HEIGHT</label>
                     <input type="text" id="inp-height" style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;" placeholder="6'0&quot;">
                 </div>
+                <div style="display:flex; gap:16px;">
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">MIN
+                            WEIGHT</label>
+                        <input type="number" id="inp-wt-min"
+                            style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                            placeholder="72">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">MAX
+                            WEIGHT</label>
+                        <input type="number" id="inp-wt-max"
+                            style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                            placeholder="82">
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">WATER GOAL
+                        (LITERS)</label>
+                    <input type="number" step="0.1" id="inp-water"
+                        style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;"
+                        placeholder="2.0">
+                </div>
                 <div>
                     <label style="display:block;font-size:12px;font-weight:800;color:#888;margin-bottom:6px;">DAILY STEPS GOAL</label>
                     <input type="number" id="inp-steps" style="width:100%;padding:14px;border-radius:12px;border:1px solid #ddd;font-size:16px;font-weight:700;" placeholder="8000">
@@ -421,26 +438,6 @@
         </div>
     </div>
 
-    <!-- Skeleton Search -->
-    <div id="search-modal" class="modal search-modal">
-        <div class="modal-content search-modal-content">
-            <div class="search-input-wrapper">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="search-icon-inside">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" id="global-search-input" placeholder="Search pages, actions, or metrics... (Esc to close)" autocomplete="off">
-            </div>
-            <div id="search-results" class="search-results-list">
-                <div class="search-hint">Try typing "water", "health", or "dark mode"</div>
-            </div>
-            <div class="search-footer">
-                <span><kbd>↑↓</kbd> to navigate</span>
-                <span><kbd>Enter</kbd> to select</span>
-                <span><kbd>Esc</kbd> to close</span>
-            </div>
-        </div>
-    </div>
 
     <script type="module" src="/src/main.ts"></script>
 </body>

@@ -26,6 +26,7 @@ interface BudgetState {
     savingsGoal: number;
     savingsProgress: number;
     goalTitle: string;
+    notifications: any[];
 }
 
 const CATEGORIES: Record<string, BudgetSubsystem> = {
@@ -44,6 +45,7 @@ let state: BudgetState = {
     savingsGoal: 25000,
     savingsProgress: 12500,
     goalTitle: 'Peloton Bike+',
+    notifications: []
 };
 
 /* ── Persistence ── */
@@ -59,18 +61,18 @@ function saveLocal() {
 async function syncToCloud() {
     saveLocal();
     try {
-        await supabase.from('budget_data').upsert({
+        await (supabase.from('budget_data').upsert({
             id: 'user_budget',
             data: state,
             updated_at: new Date().toISOString()
-        });
+        }) as any);
     } catch (e) { /* offline fallback */ }
 }
 
 async function loadFromCloud() {
     const local = loadLocal();
     try {
-        const { data } = await supabase.from('budget_data').select('data').eq('id', 'user_budget').single();
+        const { data } = await (supabase.from('budget_data').select('data').eq('id', 'user_budget').single() as any);
         if (data?.data) {
             state = { ...state, ...data.data };
         } else if (local) {
@@ -169,10 +171,11 @@ function renderTransactions() {
     const list = document.getElementById('txn-list');
     if (!list) return;
 
-    const recent = [...state.expenses].sort((a, b) => b.id - a.id).slice(0, 5);
+    // Show all expenses with internal scroll
+    const recent = [...state.expenses].sort((a, b) => b.id - a.id);
 
     if (recent.length === 0) {
-        list.innerHTML = `<div style="padding:40px 0; text-align:center; color:#aaa; font-weight:800; font-size:14px;">No expenses yet. Tap "Add Expense" to start tracking.</div>`;
+        list.innerHTML = `<div style="height: 200px; display: flex; align-items: center; justify-content: center; text-align:center; color:#aaa; font-weight:800; font-size:14px; padding: 0 20px;">No expenses yet. Tap "Add Expense" to start tracking.</div>`;
         return;
     }
 
@@ -199,7 +202,9 @@ function renderChart() {
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     const dailyLimit = Math.max(Math.round(state.monthlyBudget / daysInMonth), 1);
 
-    const data: { label: string, spent: number }[] = [];
+    const data: { label: string, spent: number, isToday: boolean }[] = [];
+    let totalWindowSpent = 0;
+    
     for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
@@ -216,30 +221,42 @@ function renderChart() {
             }
         });
 
+        totalWindowSpent += spent;
+
         data.push({
-            label: d.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0),
-            spent
+            label: d.toLocaleDateString('en-US', { weekday: 'short' }),
+            spent,
+            isToday: i === 0
         });
     }
 
     const html = data.map(d => {
         const pct = Math.min((d.spent / dailyLimit) * 100, 100);
-        const overLimit = d.spent > dailyLimit;
-        
         return `
-            <div class="bar-group">
-                <div class="bars">
-                    <div class="bar saving-bar ${overLimit ? 'over' : ''}" style="height: 120px; --fill-h: ${pct}%;"></div>
+            <div class="bar-premium-group ${d.isToday ? 'highlight' : ''}">
+                <div class="bar-premium-pill">
+                    <div class="bar-premium-fill" style="height: ${pct}%;"></div>
                 </div>
-                <div class="bar-label">${d.label}</div>
+                <div class="bar-premium-label">${d.label.charAt(0)}</div>
             </div>
         `;
     }).join('');
 
     chartEl.innerHTML = html;
 
-    const totalEl = document.querySelector('.chart-stats div:last-child div:last-child');
-    if (totalEl) totalEl.textContent = `₹${getTotalSpent().toLocaleString()}`;
+    // Update Stats
+    const statsContainer = document.querySelector('.chart-stats-premium');
+    if (statsContainer) {
+        const totalVal = statsContainer.querySelector('.stat-block:first-child .value');
+        const avgVal = statsContainer.querySelector('.stat-block:last-child .value');
+        
+        const totalThisMonth = getTotalSpent();
+        if (totalVal) totalVal.textContent = `₹${totalThisMonth.toLocaleString()}`;
+        if (avgVal) {
+            const avg = Math.round(totalThisMonth / today.getDate());
+            avgVal.textContent = `₹${avg.toLocaleString()}`;
+        }
+    }
 }
 
 /* ── Category Breakdown ── */
@@ -329,14 +346,131 @@ async function init() {
         showToast(`Switched to ${targetTheme} mode`, false);
     });
 
+    // Notification System
+    const updateNotifUI = () => {
+        const list = document.getElementById('notif-list');
+        const badge = document.getElementById('unread-count');
+        const pill = document.getElementById('unread-count-pill');
+        if(!list) return;
+
+        const globalRaw = localStorage.getItem('healthian_global_notifs');
+        const notifs = globalRaw ? JSON.parse(globalRaw) : [];
+        const unreadCount = notifs.filter((n:any) => !n.read).length;
+
+        if(badge) {
+            badge.textContent = unreadCount.toString();
+            badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+        }
+        if(pill) pill.textContent = unreadCount.toString();
+
+        if(notifs.length === 0) {
+            list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+            return;
+        }
+
+        list.innerHTML = notifs.map((n:any) => {
+            let iconSvg = '';
+            if(n.type === 'alert') iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+            else if(n.type === 'meds') iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
+            else iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M17 7a4 4 0 0 1 0 7.75"/></svg>';
+
+            return `
+                <div class="notif-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
+                    <div class="notif-icon-box ${n.type}">
+                        ${iconSvg}
+                    </div>
+                    <div class="notif-content-area">
+                        <div class="notif-title-text">${n.title}</div>
+                        <div class="notif-message-text">${n.msg}</div>
+                        <div class="notif-timestamp">${n.time}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
+    const notify = (title:string, msg:string, type:string = 'alert') => {
+        const notif = {
+            id: Date.now(),
+            title, msg, type,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            read: false
+        };
+        
+        const globalRaw = localStorage.getItem('healthian_global_notifs');
+        const notifs = globalRaw ? JSON.parse(globalRaw) : [];
+        notifs.unshift(notif);
+        localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs.slice(0, 50)));
+
+        updateNotifUI();
+        showToast(title, false);
+    };
+
+    const openNotif = () => {
+        document.getElementById('notification-center')?.classList.add('show');
+        updateNotifUI();
+    };
+    const closeNotif = () => {
+        document.getElementById('notification-center')?.classList.remove('show');
+    };
+
+    document.getElementById('bell-trigger')?.addEventListener('click', openNotif);
+    document.getElementById('close-notif')?.addEventListener('click', closeNotif);
+    
+    document.getElementById('mark-all-read')?.addEventListener('click', () => {
+        const globalRaw = localStorage.getItem('healthian_global_notifs');
+        let notifs = globalRaw ? JSON.parse(globalRaw) : [];
+        notifs.forEach((n:any) => n.read = true);
+        localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs));
+        updateNotifUI();
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('notification-center')) closeNotif();
+    });
+
     // Settings Binding
     document.getElementById('settings-trigger')?.addEventListener('click', () => {
-        // We might not have all state here, but we can at least toggle theme
-        document.getElementById('settings-modal')?.classList.add('show');
+        const modal = document.getElementById('settings-modal');
+        if (!modal) return;
+
+        // Sync theme toggle
+        const toggle = modal.querySelector('#dark-mode-toggle') as HTMLInputElement;
+        if (toggle) toggle.checked = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        modal.classList.add('show');
     });
     
     document.querySelector('.close-settings')?.addEventListener('click', () => document.getElementById('settings-modal')?.classList.remove('show'));
 
+    document.getElementById('save-settings-btn')?.addEventListener('click', () => {
+        const h = document.getElementById('inp-height') as HTMLInputElement;
+        const wm = document.getElementById('inp-wt-min') as HTMLInputElement;
+        const wx = document.getElementById('inp-wt-max') as HTMLInputElement;
+        const w = document.getElementById('inp-water') as HTMLInputElement;
+        const s = document.getElementById('inp-steps') as HTMLInputElement;
+
+        // Load main cache to preserve other daily data
+        const cacheRaw = localStorage.getItem('healthian_cache');
+        const cache = cacheRaw ? JSON.parse(cacheRaw) : { 
+            daily: {}, hr: 72, well: 85, streak: 5, prs: { deadlift: 140, squat: 120, bench: 100, run: "22:15" }, 
+            muscles: { chest: 85, back: 70, legs: 45 }, stepsGoal: 10000, waterGoal: 2.5, height: "6'0\"", weightMin: 70, weightMax: 85 
+        };
+
+        if (h) cache.height = h.value || cache.height;
+        if (wm) cache.weightMin = parseFloat(wm.value) || cache.weightMin;
+        if (wx) cache.weightMax = parseFloat(wx.value) || cache.weightMax;
+        if (w) cache.waterGoal = parseFloat(w.value) || cache.waterGoal;
+        if (s) cache.stepsGoal = parseFloat(s.value) || cache.stepsGoal;
+
+        localStorage.setItem('healthian_cache', JSON.stringify(cache));
+        
+        document.getElementById('settings-modal')?.classList.remove('show');
+        showToast("Settings Updated Globally", false);
+        notify('Settings Saved', `Goals updated — Steps: ${cache.stepsGoal.toLocaleString()}, Water: ${cache.waterGoal}L`, 'info');
+    });
+
+    updateNotifUI();
     renderAll();
 
     // Add Expense Button
@@ -427,3 +561,6 @@ async function init() {
 
 (window as any).initBudget = init;
 (window as any).customAddExpense = addExpense;
+
+// Bootstrap
+init();
