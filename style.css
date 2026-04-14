@@ -860,30 +860,67 @@ body { opacity: 0; transition: opacity 0.3s ease-in-out; } body.ready { opacity:
 
 .toast {
     position: fixed;
-    top: 30px;
+    top: 32px;
     left: 50%;
     transform: translateX(-50%) translateY(-100px);
-    background: #ff4757;
-    color: white;
-    padding: 14px 28px;
-    border-radius: 40px;
-    font-size: 15px;
-    font-weight: 800;
-    box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3);
-    z-index: 99999;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    color: #1a1a2e;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.4);
     opacity: 0;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     display: flex;
     align-items: center;
     gap: 12px;
     pointer-events: none;
-    text-align: center;
-    width: max-content;
-    max-width: 90vw;
+    z-index: 9999;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
+
+[data-theme="dark"] .toast {
+    background: rgba(30, 30, 45, 0.8);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
 .toast.show {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
+}
+
+.toast-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toast.error .toast-icon-wrapper {
+    background: rgba(255, 71, 87, 0.15);
+    color: #ff4757;
+}
+
+.toast.success .toast-icon-wrapper {
+    background: rgba(46, 213, 115, 0.15);
+    color: #2ed573;
+}
+
+/* Specific Accent for notifications */
+.toast.info .toast-icon-wrapper {
+    background: rgba(84, 160, 255, 0.15);
+    color: #54a0ff;
 }
 
 /* ── PREMIUM NOTIFICATION MODAL ── */

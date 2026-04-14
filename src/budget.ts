@@ -111,20 +111,27 @@ function getCategorySpent(cat: string): number {
 
 /* ── Toast ── */
 function showToast(msg: string, isError = false) {
-    let toast = document.getElementById('budget-toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'budget-toast';
-        toast.className = 'toast';
-        document.body.appendChild(toast);
+    let t = document.getElementById('budget-toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'budget-toast';
+        t.className = 'toast';
+        document.body.appendChild(t);
     }
     const icon = isError 
-        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;margin-right:8px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg>';
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:18px;height:18px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:18px;height:18px;"><polyline points="20 6 9 17 4 12"/></svg>';
     
-    toast.innerHTML = icon + msg;
-    toast.classList.add('show');
-    setTimeout(() => toast?.classList.remove('show'), 2500);
+    t.innerHTML = `<div class="toast-icon-wrapper">${icon}</div><div class="toast-msg">${msg}</div>`;
+    
+    t.classList.remove('success', 'error', 'info', 'show');
+    t.classList.add(isError ? 'error' : 'success');
+    
+    void t.offsetWidth;
+    t.classList.add('show');
+    
+    if ((window as any).budgetToastTimer) clearTimeout((window as any).budgetToastTimer);
+    (window as any).budgetToastTimer = setTimeout(() => { t?.classList.remove('show'); }, 3000);
 }
 
 /* ── Render All ── */
