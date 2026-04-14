@@ -120,7 +120,8 @@ async function load() {
         state.workoutExIdx = c.wIdx !== undefined ? c.wIdx : 0; state.workoutTimer = c.wTime !== undefined ? c.wTime : 0; state.workoutRunning = c.wRun !== undefined ? c.wRun : false;
         state.streak = c.streak || 12; state.prs = c.prs || state.prs; state.muscles = c.muscles || state.muscles;
         state.stepsGoal = c.sG || 8000; state.waterGoal = c.wG || 2.0; state.height = c.ht || "6'0\""; state.weightMin = c.wMin || 72; state.weightMax = c.wMax || 82;
-        renderAll(); document.body.classList.add('ready');
+        renderAll(); 
+        setTimeout(() => document.body.classList.add('ready'), 100);
     }
     try {
         let query = supabase.from('user_stats').select('*').limit(1);
@@ -153,8 +154,12 @@ async function load() {
         }
         const { data: all } = await supabase.from('daily_stats').select('*');
         if (all) all.forEach(d => { state.daily[d.date] = { ...d }; });
-        renderAll(); document.body.classList.add('ready');
-    } catch (e) { renderAll(); document.body.classList.add('ready'); }
+        renderAll(); 
+        setTimeout(() => document.body.classList.add('ready'), 200);
+    } catch (e) { 
+        renderAll(); 
+        setTimeout(() => document.body.classList.add('ready'), 200); 
+    }
 }
 
 function ensure(d: string) { if (!state.daily[d]) state.daily[d] = de(); }
