@@ -942,3 +942,131 @@ if (document.readyState === 'loading') {
     runInit();
 }
 
+
+// ── SKELETON SEARCH (COMMAND PALETTE) LOGIC ──
+const searchModal = document.getElementById('search-modal');
+const searchInput = document.getElementById('global-search-input') as HTMLInputElement;
+const searchResults = document.getElementById('search-results');
+let searchData = [
+    { name: 'Dashboard', desc: 'Overview of all metrics', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>', type: 'nav', path: 'index.html' },
+    { name: 'Health Analytics', desc: 'Blood pressure, glucose, specs', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>', type: 'nav', path: 'health.html' },
+    { name: 'Exercises', desc: 'Workout library and tracker', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.5 13.5l-7 7a2 2 0 0 1-2.8 0L2 12V2h10l8.5 8.5a2 2 0 0 1 0 2.8z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>', type: 'nav', path: 'exercises.html' },
+    { name: 'Savings & Wellness', desc: 'Budget tracking and goals', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>', type: 'nav', path: 'savings.html' },
+    { name: 'Add Water', desc: 'Log 0.25L of hydration', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>', type: 'action', action: () => {
+        state.daily[state.viewDate].water += 0.25;
+        updateWaterUI(); notify('Water Updated', 'Logged 0.25L', 'meds');
+    }},
+    { name: 'Toggle Dark Mode', desc: 'Switch system appearance', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>', type: 'action', action: () => {
+        const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem('healthian_theme', t);
+        const tog = document.getElementById('dark-mode-toggle') as HTMLInputElement;
+        if(tog) tog.checked = (t === 'dark');
+        showToast(`Switched to ${t} mode`);
+    }},
+    { name: 'Clear Notifications', desc: 'Mark all as read', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 12h6m-3-3l3 3-3 3M7 12a5 5 0 0 1 5-5v10a5 5 0 0 1-5-5z"/></svg>', type: 'action', action: () => {
+        state.daily[state.viewDate].notifications?.forEach(n => n.read = true);
+        renderNotifUI(); showToast('Notifications Cleared');
+    }},
+    { name: 'Profile Settings', desc: 'Update goals and height', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', type: 'action', action: () => { document.getElementById('settings-modal')?.classList.add('show'); }}
+];
+
+let selectedIdx = 0;
+
+function openSearch() {
+    searchModal?.classList.add('show');
+    searchInput?.focus();
+    renderSearchResults('');
+}
+
+function closeSearch() {
+    searchModal?.classList.remove('show');
+    searchInput.value = '';
+}
+
+document.getElementById('search-trigger')?.addEventListener('click', openSearch);
+
+window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openSearch();
+    }
+    if (e.key === 'Escape') closeSearch();
+    if (searchModal?.classList.contains('show')) {
+        if (e.key === 'ArrowDown') { e.preventDefault(); selectedIdx++; moveSelection(); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); selectedIdx--; moveSelection(); }
+        if (e.key === 'Enter') { e.preventDefault(); executeSelected(); }
+    }
+});
+
+searchInput?.addEventListener('input', (e) => {
+    renderSearchResults((e.target as HTMLInputElement).value);
+});
+
+function renderSearchResults(query: string) {
+    if (!searchResults) return;
+    const filtered = searchData.filter(d => 
+        d.name.toLowerCase().includes(query.toLowerCase()) || 
+        d.desc.toLowerCase().includes(query.toLowerCase())
+    );
+
+    if (filtered.length === 0) {
+        searchResults.innerHTML = '<div class="search-hint">No results found for "' + query + '"</div>';
+        return;
+    }
+
+    selectedIdx = 0;
+    searchResults.innerHTML = filtered.map((d, i) => `
+        <div class="search-item ${i === 0 ? 'selected' : ''}" data-idx="${i}">
+            <div class="search-item-icon">${d.icon}</div>
+            <div class="search-item-info">
+                <div class="search-item-name">${d.name}</div>
+                <div class="search-item-desc">${d.desc}</div>
+            </div>
+            <div class="search-item-shortcut">${d.type === 'nav' ? 'Go to' : 'Action'}</div>
+        </div>
+    `).join('');
+
+    searchResults.querySelectorAll('.search-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const idx = parseInt(item.getAttribute('data-idx') || '0');
+            executeResult(filtered[idx]);
+        });
+    });
+}
+
+function moveSelection() {
+    const items = searchResults?.querySelectorAll('.search-item');
+    if (!items || items.length === 0) return;
+    if (selectedIdx < 0) selectedIdx = items.length - 1;
+    if (selectedIdx >= items.length) selectedIdx = 0;
+    
+    items.forEach((item, i) => {
+        item.classList.toggle('selected', i === selectedIdx);
+        if (i === selectedIdx) item.scrollIntoView({ block: 'nearest' });
+    });
+}
+
+function executeSelected() {
+    const query = searchInput.value;
+    const filtered = searchData.filter(d => 
+        d.name.toLowerCase().includes(query.toLowerCase()) || 
+        d.desc.toLowerCase().includes(query.toLowerCase())
+    );
+    if (filtered[selectedIdx]) executeResult(filtered[selectedIdx]);
+}
+
+function executeResult(item: any) {
+    closeSearch();
+    if (item.type === 'nav') {
+        const link = document.createElement('a');
+        link.href = item.path;
+        // If SPA router exists:
+        const routerEvent = new CustomEvent('spa-nav', { detail: item.path });
+        window.dispatchEvent(routerEvent);
+        // Fallback for multi-page
+        if (window.location.pathname.indexOf(item.path) === -1) window.location.href = item.path;
+    } else if (item.type === 'action') {
+        item.action();
+    }
+}

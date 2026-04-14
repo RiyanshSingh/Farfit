@@ -74,7 +74,13 @@
             <span class="greeting">Hello, Riyansh </span>
             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80"
                 class="avatar" alt="User" id="settings-trigger" style="cursor:pointer;" title="Profile Settings">
-            <div style="position:relative; display:flex; align-items:center;">
+            <div style="position:relative; display:flex; align-items:center; gap:12px;">
+                <button class="search-trigger-btn" id="search-trigger" title="Search (Cmd + K)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
                 <button class="bell-btn" id="bell-trigger">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -654,6 +660,27 @@
             
             <div id="notif-list" class="notif-list" style="max-height: 450px; overflow-y: auto;">
                 <!-- Dynamic Items -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Skeleton Search -->
+    <div id="search-modal" class="modal search-modal">
+        <div class="modal-content search-modal-content">
+            <div class="search-input-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="search-icon-inside">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="global-search-input" placeholder="Search pages, actions, or metrics... (Esc to close)" autocomplete="off">
+            </div>
+            <div id="search-results" class="search-results-list">
+                <div class="search-hint">Try typing "water", "health", or "dark mode"</div>
+            </div>
+            <div class="search-footer">
+                <span><kbd>↑↓</kbd> to navigate</span>
+                <span><kbd>Enter</kbd> to select</span>
+                <span><kbd>Esc</kbd> to close</span>
             </div>
         </div>
     </div>
