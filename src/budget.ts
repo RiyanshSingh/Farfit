@@ -19,10 +19,21 @@ interface BudgetSubsystem {
     icon: string;
 }
 
+interface BillReminder {
+    id: number;
+    name: string;
+    amount: number;
+    dueDate: string;
+    dueTime: string;
+    notifiedOn?: string | null;
+    lastReminderAt?: string | null;
+}
+
 interface BudgetState {
     monthlyBudget: number;
     categories: Record<string, BudgetSubsystem>;
     expenses: Expense[];
+    bills: BillReminder[];
     savingsGoal: number;
     savingsProgress: number;
     goalTitle: string;
@@ -42,11 +53,41 @@ let state: BudgetState = {
     monthlyBudget: 15000,
     categories: { ...CATEGORIES },
     expenses: [],
+    bills: [],
     savingsGoal: 25000,
     savingsProgress: 12500,
     goalTitle: 'Peloton Bike+',
     notifications: []
 };
+
+function createDefaultBills(): BillReminder[] {
+    const today = new Date();
+    const inTwoDays = new Date(today);
+    inTwoDays.setDate(today.getDate() + 2);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+
+    return [
+        {
+            id: 101,
+            name: 'Health Insurance',
+            amount: 2500,
+            dueDate: getLocalDateKey(inTwoDays),
+            dueTime: '09:00',
+            notifiedOn: null,
+            lastReminderAt: null
+        },
+        {
+            id: 102,
+            name: 'Personal Trainer',
+            amount: 4000,
+            dueDate: getLocalDateKey(nextWeek),
+            dueTime: '18:00',
+            notifiedOn: null,
+            lastReminderAt: null
+        }
+    ];
+}
 
 /* ── Persistence ── */
 function loadLocal(): BudgetState | null {
@@ -81,6 +122,10 @@ async function loadFromCloud() {
     } catch {
         if (local) state = { ...state, ...local };
     }
+
+    if (!state.bills || state.bills.length === 0) {
+        state.bills = createDefaultBills();
+    }
 }
 
 /* ── Calculations & Helpers ── */
@@ -108,6 +153,158 @@ function getTotalSpent(): number {
 
 function getCategorySpent(cat: string): number {
     return getMonthExpenses().filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0);
+}
+
+function getLocalDateKey(date: Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function storeGlobalNotification(title: string, msg: string, type: string = 'alert') {
+    const globalRaw = localStorage.getItem('healthian_global_notifs');
+    const notifs: any[] = globalRaw ? JSON.parse(globalRaw) : [];
+    const now = Date.now();
+    const last = notifs[0];
+    if (last && last.title === title && last.msg === msg && now - last.id < 60000) {
+        return;
+    }
+
+    const notif = {
+        id: now,
+        title,
+        msg,
+        type,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        read: false
+    };
+
+    notifs.unshift(notif);
+    localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs.slice(0, 50)));
+}
+
+function getBillIconMarkup(index: number) {
+    const palette = [
+        { bg: 'rgba(240, 127, 76, 0.15)', color: '#f07f4c', icon: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+        { bg: 'rgba(245, 166, 35, 0.15)', color: '#f5a623', icon: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
+        { bg: 'rgba(141, 216, 230, 0.18)', color: '#4aa6b8', icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
+        { bg: 'rgba(197, 213, 123, 0.18)', color: '#879b36', icon: '<path d="M12 2v20M2 12h20"/>' }
+    ];
+    const item = palette[index % palette.length];
+    return `
+        <div class="txn-icon" style="background:${item.bg}; color:${item.color};">
+            <svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${item.icon}</svg>
+        </div>
+    `;
+}
+
+function getBillDueLabel(bill: BillReminder) {
+    const billDate = new Date(`${bill.dueDate}T${bill.dueTime || '09:00'}`);
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfBillDay = new Date(billDate.getFullYear(), billDate.getMonth(), billDate.getDate());
+    const diffMs = startOfBillDay.getTime() - startOfToday.getTime();
+    const diffDays = Math.round(diffMs / 86400000);
+    const timeLabel = billDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+    if (diffDays < 0) {
+        return { label: `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'} • ${timeLabel}`, urgent: true };
+    }
+    if (diffDays === 0) {
+        return { label: `Due today • ${timeLabel}`, urgent: true };
+    }
+    if (diffDays === 1) {
+        return { label: `Due tomorrow • ${timeLabel}`, urgent: false };
+    }
+    return { label: `Due in ${diffDays} days • ${timeLabel}`, urgent: false };
+}
+
+function getBillDueTimestamp(bill: BillReminder) {
+    return new Date(`${bill.dueDate}T${bill.dueTime || '09:00'}`).getTime();
+}
+
+function getBudgetSnapshot(): BudgetState {
+    const local = loadLocal();
+    const snapshot = local ? { ...state, ...local } : { ...state };
+    if (!snapshot.bills || snapshot.bills.length === 0) {
+        snapshot.bills = createDefaultBills();
+    }
+    return snapshot;
+}
+
+function persistBudgetSnapshot(snapshot: BudgetState) {
+    state = { ...state, ...snapshot };
+    saveLocal();
+}
+
+export function getBillsDueSoon(hours: number = 48): BillReminder[] {
+    const snapshot = getBudgetSnapshot();
+    const nowMs = Date.now();
+    const thresholdMs = nowMs + hours * 60 * 60 * 1000;
+
+    return [...snapshot.bills]
+        .filter((bill) => getBillDueTimestamp(bill) <= thresholdMs)
+        .sort((a, b) => getBillDueTimestamp(a) - getBillDueTimestamp(b))
+        .slice(0, 4);
+}
+
+function renderBills() {
+    const list = document.getElementById('bill-list');
+    if (!list) return;
+
+    const bills = [...state.bills]
+        .sort((a, b) => new Date(`${a.dueDate}T${a.dueTime}`).getTime() - new Date(`${b.dueDate}T${b.dueTime}`).getTime())
+        .slice(0, 4);
+
+    if (bills.length === 0) {
+        list.innerHTML = '<div style="padding:36px 0; text-align:center; color:#aaa; font-weight:800; font-size:14px;">No upcoming bills yet. Add up to 4.</div>';
+        return;
+    }
+
+    list.innerHTML = bills.map((bill, index) => {
+        const due = getBillDueLabel(bill);
+        return `
+            <div class="txn-item bill-item" data-id="${bill.id}" style="padding:12px 0;${index === bills.length - 1 ? ' border-bottom:none;' : ''}">
+                <div style="display:flex; align-items:center; gap:14px;">
+                    ${getBillIconMarkup(index)}
+                    <div class="txn-info">
+                        <div class="txn-name" style="font-size:15px;">${bill.name}</div>
+                        <div class="txn-date" style="${due.urgent ? 'color:#e03070; font-weight:900;' : ''}">${due.label}</div>
+                    </div>
+                </div>
+                <div class="txn-amt" style="font-size:15px; color:var(--text-dark);">₹${bill.amount.toLocaleString()}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+export function checkDueBills(now: Date = new Date()) {
+    const snapshot = getBudgetSnapshot();
+    const nowMs = now.getTime();
+    const todayKey = getLocalDateKey(now);
+    const reminderWindowMs = 4 * 60 * 60 * 1000;
+    let changed = false;
+    const triggeredBills: BillReminder[] = [];
+
+    snapshot.bills.forEach((bill) => {
+        const dueTimestamp = getBillDueTimestamp(bill);
+        const lastReminderMs = bill.lastReminderAt ? new Date(bill.lastReminderAt).getTime() : 0;
+
+        if (bill.dueDate === todayKey && nowMs >= dueTimestamp && (!bill.lastReminderAt || nowMs - lastReminderMs >= reminderWindowMs)) {
+            storeGlobalNotification('Bill Due Today', `${bill.name} for ₹${bill.amount.toLocaleString()} is due today at ${bill.dueTime || '09:00'}.`, 'alert');
+            bill.notifiedOn = todayKey;
+            bill.lastReminderAt = now.toISOString();
+            changed = true;
+            triggeredBills.push(bill);
+        }
+    });
+
+    if (changed) {
+        persistBudgetSnapshot(snapshot);
+    }
+
+    return triggeredBills;
 }
 
 
@@ -143,6 +340,7 @@ function renderAll() {
     renderChart();
     renderCategories();
     renderGoal();
+    renderBills();
 }
 
 /* ── Balance Card ── */
@@ -327,6 +525,44 @@ function addExpense(name: string, amount: number, category: string) {
     showToast(`₹${amount} added to ${category}`);
 }
 
+function openBillModal() {
+    if (state.bills.length >= 4) {
+        showToast('You can track up to 4 bills at a time.', true);
+        return;
+    }
+    const dateEl = document.getElementById('inp-bill-date') as HTMLInputElement | null;
+    const timeEl = document.getElementById('inp-bill-time') as HTMLInputElement | null;
+    if (dateEl && !dateEl.value) dateEl.value = getLocalDateKey(new Date());
+    if (timeEl && !timeEl.value) timeEl.value = '09:00';
+    document.getElementById('bill-modal')?.classList.add('show');
+}
+
+function closeBillModal() {
+    document.getElementById('bill-modal')?.classList.remove('show');
+}
+
+function addBill(name: string, amount: number, dueDate: string, dueTime: string) {
+    if (state.bills.length >= 4) {
+        showToast('Maximum of 4 upcoming bills reached.', true);
+        return;
+    }
+
+    state.bills.push({
+        id: Date.now(),
+        name,
+        amount,
+        dueDate,
+        dueTime,
+        notifiedOn: null,
+        lastReminderAt: null
+    });
+
+    renderAll();
+    syncToCloud();
+    storeGlobalNotification('Bill Added', `${name} is scheduled for ${dueDate} at ${dueTime}.`, 'info');
+    showToast(`Bill added: ${name}`, false);
+}
+
 /* ── Init ── */
 async function init() {
     await loadFromCloud();
@@ -389,23 +625,6 @@ async function init() {
         }).join('');
     };
 
-    const notify = (title:string, msg:string, type:string = 'alert') => {
-        const notif = {
-            id: Date.now(),
-            title, msg, type,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            read: false
-        };
-        
-        const globalRaw = localStorage.getItem('healthian_global_notifs');
-        const notifs = globalRaw ? JSON.parse(globalRaw) : [];
-        notifs.unshift(notif);
-        localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs.slice(0, 50)));
-
-        updateNotifUI();
-        showToast(title, false);
-    };
-
     const openNotif = () => {
         document.getElementById('notification-center')?.classList.add('show');
         updateNotifUI();
@@ -417,14 +636,6 @@ async function init() {
     document.getElementById('bell-trigger')?.addEventListener('click', openNotif);
     document.getElementById('close-notif')?.addEventListener('click', closeNotif);
     
-    document.getElementById('mark-all-read')?.addEventListener('click', () => {
-        const globalRaw = localStorage.getItem('healthian_global_notifs');
-        let notifs = globalRaw ? JSON.parse(globalRaw) : [];
-        notifs.forEach((n:any) => n.read = true);
-        localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs));
-        updateNotifUI();
-    });
-
     window.addEventListener('click', (e) => {
         if (e.target === document.getElementById('notification-center')) closeNotif();
     });
@@ -466,16 +677,22 @@ async function init() {
         localStorage.setItem('healthian_cache', JSON.stringify(cache));
         
         document.getElementById('settings-modal')?.classList.remove('show');
-        showToast("Settings Updated Globally", false);
-        notify('Settings Saved', `Goals updated — Steps: ${cache.stepsGoal.toLocaleString()}, Water: ${cache.waterGoal}L`, 'info');
+        showToast("Settings updated", false);
     });
 
     updateNotifUI();
+    const dueBills = checkDueBills();
+    if (dueBills.length > 0) {
+        showToast(`${dueBills[0].name} is due now`, false);
+        updateNotifUI();
+    }
     renderAll();
 
     // Add Expense Button
     document.getElementById('add-expense-trigger')?.addEventListener('click', openAddExpense);
     document.querySelector('.close-expense')?.addEventListener('click', closeAddExpense);
+    document.getElementById('add-bill-trigger')?.addEventListener('click', openBillModal);
+    document.querySelector('.close-bill')?.addEventListener('click', closeBillModal);
 
     document.getElementById('save-expense-btn')?.addEventListener('click', () => {
         const nameEl = document.getElementById('inp-exp-name') as HTMLInputElement;
@@ -485,6 +702,26 @@ async function init() {
         addExpense(nameEl.value, parseFloat(amtEl.value), catEl.value);
         nameEl.value = ''; amtEl.value = '';
         closeAddExpense();
+    });
+
+    document.getElementById('save-bill-btn')?.addEventListener('click', () => {
+        const nameEl = document.getElementById('inp-bill-name') as HTMLInputElement;
+        const amtEl = document.getElementById('inp-bill-amount') as HTMLInputElement;
+        const dateEl = document.getElementById('inp-bill-date') as HTMLInputElement;
+        const timeEl = document.getElementById('inp-bill-time') as HTMLInputElement;
+
+        if (!nameEl.value || !amtEl.value || !dateEl.value || !timeEl.value) {
+            showToast('Please fill in bill name, amount, date, and time.', true);
+            return;
+        }
+
+        addBill(nameEl.value, parseFloat(amtEl.value), dateEl.value, timeEl.value);
+        nameEl.value = '';
+        amtEl.value = '';
+        dateEl.value = '';
+        timeEl.value = '';
+        closeBillModal();
+        updateNotifUI();
     });
 
     // Edit Budget on balance card click
@@ -535,6 +772,21 @@ async function init() {
             renderAll();
             syncToCloud();
             showToast('Expense deleted');
+        }
+    });
+
+    document.getElementById('bill-list')?.addEventListener('click', async (e) => {
+        const item = (e.target as HTMLElement).closest('.bill-item');
+        if (!item) return;
+        const id = parseInt(item.getAttribute('data-id') || '0');
+        if (!id) return;
+
+        if (await healthianConfirm('Mark Bill As Paid?', 'This will remove the bill reminder from Upcoming Bills.')) {
+            const bill = state.bills.find((entry) => entry.id === id);
+            state.bills = state.bills.filter((entry) => entry.id !== id);
+            renderAll();
+            syncToCloud();
+            showToast(bill ? `${bill.name} marked paid` : 'Bill marked as paid', false);
         }
     });
 

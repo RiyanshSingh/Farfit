@@ -430,7 +430,10 @@
                     <h2 style="font-weight:900;font-size:24px;color:var(--text-dark);margin:0;">Notifications</h2>
                     <span id="unread-count-pill" class="badge-pill">0</span>
                 </div>
-                <button id="close-notif" class="close-modal">&times;</button>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <button id="mark-all-read" type="button" class="text-btn" style="color:#e03070; background:none; border:none; font-weight:800; cursor:pointer; font-size:14px;">Mark all read</button>
+                    <button id="close-notif" class="close-modal">&times;</button>
+                </div>
             </div>
             <div id="notif-list" class="notif-list" style="max-height: 450px; overflow-y: auto;">
                 <div class="notif-empty">No notifications yet</div>

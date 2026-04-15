@@ -90,7 +90,9 @@
         <!-- Header -->
         <div class="dashboard-header">
             <h1>Dashboard</h1>
-            <div class="header-btns">
+            <div class="dashboard-header-actions">
+                <div id="home-bill-alert" class="home-bill-alert"></div>
+                <div class="header-btns">
                 <div class="workout-dropdown-container">
                     <button class="cardio-btn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -127,6 +129,7 @@
                         <polyline points="6 9 12 15 18 9" />
                     </svg>
                 </button>
+                </div>
             </div>
         </div>
 
@@ -647,7 +650,7 @@
                     <span id="unread-count-pill" class="badge-pill">0</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:15px;">
-                    <button id="mark-all-read" class="text-btn" style="color:#e03070; background:none; border:none; font-weight:800; cursor:pointer; font-size: 14px;">Mark read</button>
+                    <button id="mark-all-read" type="button" class="text-btn" style="color:#e03070; background:none; border:none; font-weight:800; cursor:pointer; font-size: 14px;">Mark all read</button>
                     <button id="close-notif" class="close-modal">×</button>
                 </div>
             </div>

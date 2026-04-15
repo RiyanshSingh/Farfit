@@ -541,32 +541,14 @@
 #txn-list {
     flex: 1;
     overflow-y: auto;
-    padding-right: 6px;
+    padding-right: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 #txn-list::-webkit-scrollbar {
-    width: 5px;
-}
-
-#txn-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-#txn-list::-webkit-scrollbar-thumb {
-    background: rgba(120, 150, 180, 0.15);
-    border-radius: 10px;
-}
-
-#txn-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(120, 150, 180, 0.3);
-}
-
-#txn-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-#txn-list::-webkit-scrollbar-track {
-    background: transparent;
+    width: 0;
+    height: 0;
 }
 
 /* Fitness Budgeting Modules */

@@ -170,6 +170,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 16px;
             margin-bottom: 24px;
         }
 
@@ -177,11 +178,28 @@
             font-size: 38px;
             font-weight: 900;
             letter-spacing: -0.5px;
+            margin: 0;
+        }
+
+        .dashboard-header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
         }
 
         .header-btns {
             display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
             gap: 12px;
+        }
+
+        .dashboard-header-actions > .home-bill-alert {
+            flex: 0 1 auto;
+            min-width: 0;
         }
 
         .cardio-btn {
@@ -251,6 +269,83 @@
             display: grid;
             grid-template-columns: 440px minmax(360px, 1fr) 340px;
             gap: 20px;
+        }
+
+        .home-bill-alert {
+            display: none;
+            align-items: center;
+            margin: 0;
+        }
+
+        .home-bill-alert-kicker {
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: #e03070;
+            line-height: 1;
+        }
+
+        .home-bill-alert-title {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--text-dark);
+            line-height: 1.1;
+        }
+
+        .home-bill-alert-meta {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-light);
+            line-height: 1.2;
+            flex: 1 1 0;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+        }
+
+        .home-bill-alert-btn {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 10px;
+            min-height: 56px;
+            border-radius: 999px;
+            padding: 8px 18px;
+            font: inherit;
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--text-dark);
+            border: 1px solid rgba(224, 48, 112, 0.14);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            white-space: nowrap;
+            max-width: min(560px, 100%);
+            min-width: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .home-bill-alert-btn {
+            background: rgba(30, 41, 59, 0.96);
+            border-color: rgba(224, 48, 112, 0.22);
+        }
+
+        .home-bill-alert-btn .home-bill-alert-kicker,
+        .home-bill-alert-btn .home-bill-alert-title {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .home-bill-alert-btn .home-bill-alert-title {
+            max-width: 11rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .home-bill-alert-btn:hover {
+            transform: translateY(-1px);
         }
 
         /* ── CARDS ── */

@@ -23,7 +23,39 @@
         max-width: 100%;
     }
 
+    /* Home: Dashboard → bill chip (below title) → workout + date */
+    .page .dashboard-header:has(.dashboard-header-actions) {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "title"
+            "bill"
+            "tools";
+        gap: 10px;
+        align-items: stretch;
+        margin-bottom: 30px;
+    }
+
+    .page .dashboard-header:has(.dashboard-header-actions) .dashboard-header-actions {
+        display: contents;
+    }
+
+    .page .dashboard-header:has(.dashboard-header-actions) > h1 {
+        grid-area: title;
+    }
+
+    .page .dashboard-header:has(.dashboard-header-actions) #home-bill-alert {
+        grid-area: bill;
+        width: 100%;
+        max-width: none;
+    }
+
+    .page .dashboard-header:has(.dashboard-header-actions) .header-btns {
+        grid-area: tools;
+    }
+
     .dashboard-header {
+        display: flex;
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
@@ -41,9 +73,15 @@
         flex-direction: row; /* Back to side-by-side */
         gap: 8px;
         align-items: center;
+        justify-content: flex-start;
     }
 
-    .header-btns button {
+    .page .dashboard-header .home-bill-alert-btn {
+        width: 100% !important;
+        max-width: 100%;
+    }
+
+    .header-btns button:not(.home-bill-alert-btn) {
         min-height: 46px !important;
         font-size: 13px !important;
         border-radius: 40px !important;

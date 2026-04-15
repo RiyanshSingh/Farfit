@@ -137,30 +137,12 @@
                 <div class="tips-card" style="display: flex; flex-direction: column;">
                     <div class="section-header" style="margin-bottom:16px;">
                         <span style="font-size:20px; font-weight:900;">Upcoming Bills</span>
+                        <button id="add-bill-trigger" class="today-dropdown" style="background:var(--olive); color:#12121a; cursor:pointer;">
+                            <svg width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Bill
+                        </button>
                     </div>
-                    <div class="txn-item" style="padding:12px 0;">
-                        <div style="display:flex; align-items:center; gap:14px;">
-                            <div class="txn-icon" style="background:rgba(240, 127, 76, 0.15); color:#f07f4c;">
-                                <svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            </div>
-                            <div class="txn-info">
-                                <div class="txn-name" style="font-size:15px;">Health Insurance</div>
-                                <div class="txn-date" style="color:#e03070; font-weight:900;">Due in 2 days</div>
-                            </div>
-                        </div>
-                        <div class="txn-amt" style="font-size:15px; color:var(--text-dark);">₹2,500</div>
-                    </div>
-                    <div class="txn-item" style="padding:12px 0; border-bottom:none;">
-                        <div style="display:flex; align-items:center; gap:14px;">
-                            <div class="txn-icon" style="background:rgba(245, 166, 35, 0.15); color:#f5a623;">
-                                <svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                            </div>
-                            <div class="txn-info">
-                                <div class="txn-name" style="font-size:15px;">Personal Trainer</div>
-                                <div class="txn-date">Due exactly next week</div>
-                            </div>
-                        </div>
-                        <div class="txn-amt" style="font-size:15px; color:var(--text-dark);">₹4,000</div>
+                    <div id="bill-list" style="display:flex; flex-direction:column;">
+                        <div style="padding:36px 0; text-align:center; color:#aaa; font-weight:800; font-size:14px;">No upcoming bills yet. Add up to 4.</div>
                     </div>
                 </div>
             </div>
@@ -250,6 +232,37 @@
         </div>
     </div>
 
+    <div id="bill-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Bill Reminder</h3>
+                <button class="close-modal close-bill">×</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:800;color:var(--text-light);margin-bottom:6px;">BILL NAME</label>
+                    <input type="text" id="inp-bill-name" placeholder="e.g. Health Insurance" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(120, 150, 180, 0.1);font-size:16px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--text-dark);">
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;font-weight:800;color:var(--text-light);margin-bottom:6px;">AMOUNT (₹)</label>
+                    <input type="number" id="inp-bill-amount" placeholder="2500" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(120, 150, 180, 0.1);font-size:16px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--text-dark);">
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:800;color:var(--text-light);margin-bottom:6px;">DUE DATE</label>
+                        <input type="date" id="inp-bill-date" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(120, 150, 180, 0.1);font-size:16px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--text-dark);">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:800;color:var(--text-light);margin-bottom:6px;">DUE TIME</label>
+                        <input type="time" id="inp-bill-time" style="width:100%;padding:14px;border-radius:12px;border:1px solid rgba(120, 150, 180, 0.1);font-size:16px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--text-dark);">
+                    </div>
+                </div>
+                <button id="save-bill-btn" style="margin-top:8px;width:100%;padding:16px;background:var(--olive);color:#12121a;border:none;border-radius:16px;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit;">Save Bill</button>
+            </div>
+        </div>
+    </div>
+
     <!-- APK-style bottom navigation (mobile only) -->
     <nav class="bottom-nav">
         <a href="index.html">
@@ -335,7 +348,10 @@
                     <h2 style="font-weight:900;font-size:24px;color:var(--text-dark);margin:0;">Notifications</h2>
                     <span id="unread-count-pill" class="badge-pill">0</span>
                 </div>
-                <button id="close-notif" class="close-modal">&times;</button>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <button id="mark-all-read" type="button" class="text-btn" style="color:#e03070; background:none; border:none; font-weight:800; cursor:pointer; font-size:14px;">Mark all read</button>
+                    <button id="close-notif" class="close-modal">&times;</button>
+                </div>
             </div>
             <div id="notif-list" class="notif-list" style="max-height: 450px; overflow-y: auto;">
                 <div class="notif-empty">No notifications yet</div>
@@ -344,6 +360,6 @@
     </div>
 
 
-    <script type="module" src="/src/budget.ts"></script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
