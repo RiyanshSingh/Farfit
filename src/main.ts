@@ -75,7 +75,7 @@ async function sync() {
     try {
         const d = state.daily[state.viewDate] || de();
         await supabase.from('daily_stats').upsert({
-            date: state.viewDate, ...d
+            date: state.viewDate, user_id: state.id, ...d
         });
         const res = await supabase.from('user_stats').upsert({
             id: state.id || undefined, heart_rate: state.heartRate, wellness_score: state.wellnessScore, 
@@ -123,45 +123,47 @@ async function load() {
         state.workoutExIdx = c.wIdx !== undefined ? c.wIdx : 0; state.workoutTimer = c.wTime !== undefined ? c.wTime : 0; state.workoutRunning = c.wRun !== undefined ? c.wRun : false;
         state.streak = c.streak || 12; state.prs = c.prs || state.prs; state.muscles = c.muscles || state.muscles;
         state.stepsGoal = c.sG || 8000; state.waterGoal = c.wG || 2.0; state.height = c.ht || "6'0\""; state.weightMin = c.wMin || 72; state.weightMax = c.wMax || 82;
-        renderAll(); 
-        setTimeout(() => document.body.classList.add('ready'), 100);
+        renderAll();
     }
     try {
-        let query = supabase.from('user_stats').select('*').limit(1);
-        if (state.id) query = query.eq('id', state.id);
-        
-        const { data: user } = await query.single();
-        if (user) { 
-            state.id = user.id; localStorage.setItem('healthian_id', state.id);
-            state.heartRate = user.heart_rate ?? state.heartRate; 
-            state.wellnessScore = user.wellness_score ?? state.wellnessScore; 
-            // Ensure DB doesn't overwrite our local selections if they are active
-            if (!cache) {
-                state.workoutExIdx = user.workout_ex_idx ?? state.workoutExIdx; 
-                state.workoutTimer = user.workout_timer ?? state.workoutTimer;
-                state.workoutRunning = user.workout_running ?? state.workoutRunning;
-                state.stepsGoal = user.steps_goal || state.stepsGoal;
-                state.waterGoal = user.water_goal || state.waterGoal;
-                state.height = user.height || state.height;
-                state.weightMin = user.weight_min || state.weightMin;
-                state.weightMax = user.weight_max || state.weightMax;
+        if (state.id) {
+            const { data: user, error } = await supabase.from('user_stats')
+                .select('*')
+                .eq('id', state.id)
+                .single();
+            
+            if (user && !error) { 
+                state.id = user.id; localStorage.setItem('healthian_id', state.id);
+                state.heartRate = user.heart_rate ?? state.heartRate; 
+                state.wellnessScore = user.wellness_score ?? state.wellnessScore; 
+                // Ensure DB doesn't overwrite our local selections if they are active
+                if (!cache) {
+                    state.workoutExIdx = user.workout_ex_idx ?? state.workoutExIdx; 
+                    state.workoutTimer = user.workout_timer ?? state.workoutTimer;
+                    state.workoutRunning = user.workout_running ?? state.workoutRunning;
+                    state.stepsGoal = user.steps_goal || state.stepsGoal;
+                    state.waterGoal = user.water_goal || state.waterGoal;
+                    state.height = user.height || state.height;
+                    state.weightMin = user.weight_min || state.weightMin;
+                    state.weightMax = user.weight_max || state.weightMax;
+                }
+                state.streak = user.streak ?? state.streak;
+                state.prs.deadlift = user.pr_deadlift ?? state.prs.deadlift;
+                state.prs.squat = user.pr_squat ?? state.prs.squat;
+                state.prs.bench = user.pr_bench ?? state.prs.bench;
+                state.prs.run = user.pr_run ?? state.prs.run;
+                state.muscles.chest = user.muscle_chest ?? state.muscles.chest;
+                state.muscles.back = user.muscle_back ?? state.muscles.back;
+                state.muscles.legs = user.muscle_legs ?? state.muscles.legs;
             }
-            state.streak = user.streak ?? state.streak;
-            state.prs.deadlift = user.pr_deadlift ?? state.prs.deadlift;
-            state.prs.squat = user.pr_squat ?? state.prs.squat;
-            state.prs.bench = user.pr_bench ?? state.prs.bench;
-            state.prs.run = user.pr_run ?? state.prs.run;
-            state.muscles.chest = user.muscle_chest ?? state.muscles.chest;
-            state.muscles.back = user.muscle_back ?? state.muscles.back;
-            state.muscles.legs = user.muscle_legs ?? state.muscles.legs;
         }
-        const { data: all } = await supabase.from('daily_stats').select('*');
+        const { data: all } = await (state.id 
+            ? supabase.from('daily_stats').select('*').eq('user_id', state.id)
+            : { data: null });
         if (all) all.forEach(d => { state.daily[d.date] = { ...d }; });
         renderAll(); 
-        setTimeout(() => document.body.classList.add('ready'), 200);
     } catch (e) { 
         renderAll(); 
-        setTimeout(() => document.body.classList.add('ready'), 200); 
     }
 }
 
@@ -597,7 +599,7 @@ function updateExercisesPageUI() {
         const deadliftEl = prItems[0].querySelector('.pr-val'); if(deadliftEl) deadliftEl.innerHTML = `${state.prs.deadlift} <span>kg</span>`;
         const squatEl = prItems[1].querySelector('.pr-val'); if(squatEl) squatEl.innerHTML = `${state.prs.squat} <span>kg</span>`;
         const benchEl = prItems[2].querySelector('.pr-val'); if(benchEl) benchEl.innerHTML = `${state.prs.bench} <span>kg</span>`;
-        const runEl = prItems[3].querySelector('.pr-val'); if(runEl) runEl.innerHTML = `${state.prs.run} <span>min</span>`;
+        const runEl = prItems[3].querySelector('.pr-val'); if(runEl) runEl.innerHTML = `${state.prs.run} <span>time</span>`;
     }
 
     updateFeaturedWorkoutCard();
@@ -854,7 +856,8 @@ function setupNotificationInboxHandlers() {
     });
 }
 
-function updateNotifUI() {
+export function updateNotifUI() {
+    (window as any).updateNotifUI = updateNotifUI;
     const list = document.getElementById('notif-list');
     const badge = document.getElementById('unread-count');
     const pill = document.getElementById('unread-count-pill');
@@ -896,8 +899,8 @@ function updateNotifUI() {
     }).join('');
 }
 
-function init() {
-    load();
+async function init() {
+    await load();
     setupNotificationInboxHandlers();
     updateNotifUI();
     syncBillReminderUI();
@@ -983,8 +986,17 @@ function init() {
     });
     (window as any)._mainDocClickBound = true;
 }
-    document.querySelector('.cal-trigger')?.addEventListener('click', () => document.getElementById('calendar-modal')?.classList.add('show'));
-    document.querySelector('.close-modal')?.addEventListener('click', () => document.getElementById('calendar-modal')?.classList.remove('show'));
+    // Helper for re-binding simple triggers
+    const bindLocalTrigger = (selector: string, cb: Function) => {
+        const el = document.querySelector(selector);
+        if (el) el.addEventListener('click', (e) => { e.preventDefault(); cb(e); });
+    };
+
+    bindLocalTrigger('.cal-trigger', () => document.getElementById('calendar-modal')?.classList.add('show'));
+    bindLocalTrigger('.close-modal', () => {
+        document.getElementById('calendar-modal')?.classList.remove('show');
+        document.getElementById('notification-center')?.classList.remove('show');
+    });
 
     // Notification Modal Controls
     const openNotif = () => {
@@ -995,20 +1007,7 @@ function init() {
         document.getElementById('notification-center')?.classList.remove('show');
     };
 
-    document.getElementById('bell-trigger')?.addEventListener('click', openNotif);
-    document.getElementById('close-notif')?.addEventListener('click', closeNotif);
-    
-    // Close modal on background click
-    if (!(window as any)._mainWinClickBound) {
-        window.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('notification-center')) closeNotif();
-        });
-        (window as any)._mainWinClickBound = true;
-    }
-
-    
-    // Settings Binding
-    document.getElementById('settings-trigger')?.addEventListener('click', () => {
+    const openSettings = () => {
         const h = document.getElementById('inp-height') as HTMLInputElement;
         const wm = document.getElementById('inp-wt-min') as HTMLInputElement;
         const wx = document.getElementById('inp-wt-max') as HTMLInputElement;
@@ -1022,9 +1021,37 @@ function init() {
         if (s) s.value = state.stepsGoal.toString();
         
         document.getElementById('settings-modal')?.classList.add('show');
-    });
+    };
+
+    // GLOBAL DELEGATION for Persistent UI Elements
+    if (!(window as any)._mainGlobalInit) {
+        document.addEventListener('click', (e) => {
+            const target = e.target as HTMLElement;
+            
+            // Bell Trigger
+            if (target.closest('#bell-trigger')) {
+                e.preventDefault();
+                openNotif();
+            }
+            
+            // Settings Trigger
+            if (target.closest('#settings-trigger')) {
+                e.preventDefault();
+                openSettings();
+            }
+
+            // Close Modals on background click
+            if (target.classList.contains('modal')) {
+                target.classList.remove('show');
+            }
+        });
+        (window as any)._mainGlobalInit = true;
+    }
+
+    bindLocalTrigger('.close-settings', () => document.getElementById('settings-modal')?.classList.remove('show'));
+    bindLocalTrigger('#close-notif', closeNotif);
+
     
-    document.querySelector('.close-settings')?.addEventListener('click', () => document.getElementById('settings-modal')?.classList.remove('show'));
     
     document.getElementById('save-settings-btn')?.addEventListener('click', () => {
         const h = document.getElementById('inp-height') as HTMLInputElement;
@@ -1244,11 +1271,18 @@ function init() {
 
 (window as any).initMain = init;
 
-const runInit = () => {
+export async function runInit() {
     if ((window as any)._mainInitialized) return;
     (window as any)._mainInitialized = true;
-    init();
-    initSPA();
+    try {
+        initSPA();
+        await init();
+        if (window.location.pathname.includes('savings') && (window as any).initBudget) {
+            await (window as any).initBudget();
+        }
+    } finally {
+        document.body.classList.add('ready');
+    }
 };
 
 if (document.readyState === 'loading') {
@@ -1256,6 +1290,7 @@ if (document.readyState === 'loading') {
 } else {
     runInit();
 }
+
 
 
 // ── SKELETON SEARCH (COMMAND PALETTE) LOGIC ──
@@ -1274,7 +1309,7 @@ let searchData = [
         localStorage.setItem('healthian_theme', t);
         const tog = document.getElementById('dark-mode-toggle') as HTMLInputElement;
         if(tog) tog.checked = (t === 'dark');
-        showToast(`Switched to ${t} mode`);
+        showToast(`Switched to ${t} mode`, false);
     }},
     { name: 'Clear Notifications', desc: 'Mark all as read', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 12h6m-3-3l3 3-3 3M7 12a5 5 0 0 1 5-5v10a5 5 0 0 1-5-5z"/></svg>', type: 'action', action: () => {
         const globalRaw = localStorage.getItem('healthian_global_notifs');
@@ -1282,7 +1317,7 @@ let searchData = [
         notifs.forEach((n: any) => n.read = true);
         localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs));
         updateNotifUI();
-        showToast('Notifications Cleared');
+        showToast('Notifications Cleared', false);
     }},
     { name: 'Profile Settings', desc: 'Update goals and height', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', type: 'action', action: () => { document.getElementById('settings-modal')?.classList.add('show'); }}
 ];

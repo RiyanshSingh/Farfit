@@ -101,9 +101,10 @@ function saveLocal() {
 
 async function syncToCloud() {
     saveLocal();
+    const userId = localStorage.getItem('healthian_id');
     try {
         await (supabase.from('budget_data').upsert({
-            id: 'user_budget',
+            id: userId || 'user_budget',
             data: state,
             updated_at: new Date().toISOString()
         }) as any);
@@ -112,8 +113,9 @@ async function syncToCloud() {
 
 async function loadFromCloud() {
     const local = loadLocal();
+    const userId = localStorage.getItem('healthian_id');
     try {
-        const { data } = await (supabase.from('budget_data').select('data').eq('id', 'user_budget').single() as any);
+        const { data } = await (supabase.from('budget_data').select('data').eq('id', userId || 'user_budget').single() as any);
         if (data?.data) {
             state = { ...state, ...data.data };
         } else if (local) {
@@ -162,15 +164,20 @@ function getLocalDateKey(date: Date) {
     return `${year}-${month}-${day}`;
 }
 
+/**
+ * Centralized notification handler - uses the global notify from main.ts if available,
+ * otherwise falls back to local storage for background persistence.
+ */
 function storeGlobalNotification(title: string, msg: string, type: string = 'alert') {
+    if ((window as any).notify) {
+        (window as any).notify(title, msg, type);
+        return;
+    }
+    
     const globalRaw = localStorage.getItem('healthian_global_notifs');
     const notifs: any[] = globalRaw ? JSON.parse(globalRaw) : [];
     const now = Date.now();
-    const last = notifs[0];
-    if (last && last.title === title && last.msg === msg && now - last.id < 60000) {
-        return;
-    }
-
+    
     const notif = {
         id: now,
         title,
@@ -183,6 +190,7 @@ function storeGlobalNotification(title: string, msg: string, type: string = 'ale
     notifs.unshift(notif);
     localStorage.setItem('healthian_global_notifs', JSON.stringify(notifs.slice(0, 50)));
 }
+
 
 function getBillIconMarkup(index: number) {
     const palette = [
@@ -236,6 +244,19 @@ function getBudgetSnapshot(): BudgetState {
 function persistBudgetSnapshot(snapshot: BudgetState) {
     state = { ...state, ...snapshot };
     saveLocal();
+}
+
+function bindBudgetListener(
+    element: Element | null,
+    key: string,
+    event: string,
+    handler: EventListener
+) {
+    if (!(element instanceof HTMLElement)) return;
+    const flag = `healthianBound${key}`;
+    if (element.dataset[flag]) return;
+    element.dataset[flag] = 'true';
+    element.addEventListener(event, handler);
 }
 
 export function getBillsDueSoon(hours: number = 48): BillReminder[] {
@@ -575,220 +596,150 @@ async function init() {
         if (themeToggle) themeToggle.checked = true;
     }
 
-    themeToggle?.addEventListener('change', () => {
-        const targetTheme = themeToggle.checked ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', targetTheme);
-        localStorage.setItem('healthian_theme', targetTheme);
-        showToast(`Switched to ${targetTheme} mode`, false);
-    });
+    // Setup global event delegation for robust interaction across SPA view swaps
+    if (!(window as any)._budgetGlobalInit) {
+        document.body.addEventListener('click', async (e) => {
+            const target = e.target as HTMLElement;
 
-    // Notification System
-    const updateNotifUI = () => {
-        const list = document.getElementById('notif-list');
-        const badge = document.getElementById('unread-count');
-        const pill = document.getElementById('unread-count-pill');
-        if(!list) return;
+            // Open/Close Add Expense
+            if (target.closest('#add-expense-trigger')) {
+                e.preventDefault();
+                openAddExpense();
+            }
+            if (target.closest('.close-expense')) {
+                e.preventDefault();
+                closeAddExpense();
+            }
 
-        const globalRaw = localStorage.getItem('healthian_global_notifs');
-        const notifs = globalRaw ? JSON.parse(globalRaw) : [];
-        const unreadCount = notifs.filter((n:any) => !n.read).length;
+            // Open/Close Add Bill
+            if (target.closest('#add-bill-trigger')) {
+                e.preventDefault();
+                openBillModal();
+            }
+            if (target.closest('.close-bill')) {
+                e.preventDefault();
+                closeBillModal();
+            }
 
-        if(badge) {
-            badge.textContent = unreadCount.toString();
-            badge.style.display = unreadCount > 0 ? 'flex' : 'none';
-        }
-        if(pill) pill.textContent = unreadCount.toString();
+            // Save Expense
+            if (target.closest('#save-expense-btn')) {
+                e.preventDefault();
+                const nameEl = document.getElementById('inp-exp-name') as HTMLInputElement;
+                const amtEl = document.getElementById('inp-exp-amount') as HTMLInputElement;
+                const catEl = document.getElementById('inp-exp-cat') as HTMLSelectElement;
+                if (!nameEl || !amtEl || !catEl || !nameEl.value || !amtEl.value) return;
+                
+                addExpense(nameEl.value, parseFloat(amtEl.value), catEl.value);
+                nameEl.value = ''; 
+                amtEl.value = '';
+                closeAddExpense();
+            }
 
-        if(notifs.length === 0) {
-            list.innerHTML = '<div class="notif-empty">No notifications yet</div>';
-            return;
-        }
+            // Save Bill
+            if (target.closest('#save-bill-btn')) {
+                e.preventDefault();
+                const nameEl = document.getElementById('inp-bill-name') as HTMLInputElement;
+                const amtEl = document.getElementById('inp-bill-amount') as HTMLInputElement;
+                const dateEl = document.getElementById('inp-bill-date') as HTMLInputElement;
+                const timeEl = document.getElementById('inp-bill-time') as HTMLInputElement;
 
-        list.innerHTML = notifs.map((n:any) => {
-            let iconSvg = '';
-            if(n.type === 'alert') iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-            else if(n.type === 'meds') iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
-            else iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M17 7a4 4 0 0 1 0 7.75"/></svg>';
+                if (!nameEl?.value || !amtEl?.value || !dateEl?.value || !timeEl?.value) {
+                    showToast('Please fill in bill name, amount, date, and time.', true);
+                    return;
+                }
 
-            return `
-                <div class="notif-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
-                    <div class="notif-icon-box ${n.type}">
-                        ${iconSvg}
-                    </div>
-                    <div class="notif-content-area">
-                        <div class="notif-title-text">${n.title}</div>
-                        <div class="notif-message-text">${n.msg}</div>
-                        <div class="notif-timestamp">${n.time}</div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    };
+                addBill(nameEl.value, parseFloat(amtEl.value), dateEl.value, timeEl.value);
+                nameEl.value = ''; amtEl.value = ''; dateEl.value = ''; timeEl.value = '';
+                closeBillModal();
+                if ((window as any).updateNotifUI) (window as any).updateNotifUI();
+                return;
+            }
 
-    const openNotif = () => {
-        document.getElementById('notification-center')?.classList.add('show');
-        updateNotifUI();
-    };
-    const closeNotif = () => {
-        document.getElementById('notification-center')?.classList.remove('show');
-    };
+            // Edit Budget on balance card click
+            if (target.closest('.bal-btn') && !target.hasAttribute('onclick')) {
+                e.preventDefault();
+                const v = await healthianPrompt('Set Monthly Budget (₹):', state.monthlyBudget.toString());
+                if (v) {
+                    state.monthlyBudget = parseFloat(v);
+                    renderAll();
+                    syncToCloud();
+                    showToast('Budget updated!', false);
+                }
+                return;
+            }
 
-    document.getElementById('bell-trigger')?.addEventListener('click', openNotif);
-    document.getElementById('close-notif')?.addEventListener('click', closeNotif);
-    
-    window.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('notification-center')) closeNotif();
-    });
+            // Edit category limits
+            const catRow = target.closest('.cat-row');
+            if (catRow && target.closest('#cat-list')) {
+                const catName = catRow.getAttribute('data-cat');
+                if (catName && state.categories[catName]) {
+                    const v = await healthianPrompt(`Set limit for ${catName} (₹):`, state.categories[catName].limit.toString());
+                    if (v) {
+                        state.categories[catName].limit = parseFloat(v);
+                        renderAll();
+                        syncToCloud();
+                        showToast(`${catName} limit updated!`, false);
+                    }
+                }
+                return;
+            }
 
-    // Settings Binding
-    document.getElementById('settings-trigger')?.addEventListener('click', () => {
-        const modal = document.getElementById('settings-modal');
-        if (!modal) return;
+            // Delete expense (long press or click on txn)
+            const txnItem = target.closest('.txn-item');
+            if (txnItem && target.closest('#txn-list')) {
+                const id = parseInt(txnItem.getAttribute('data-id') || '0');
+                if (id) {
+                    if (await healthianConfirm('Delete Expense?', 'Are you sure you want to remove this expense record?')) {
+                        state.expenses = state.expenses.filter(ex => ex.id !== id);
+                        renderAll();
+                        syncToCloud();
+                        showToast('Expense deleted', false);
+                    }
+                }
+                return;
+            }
 
-        // Sync theme toggle
-        const toggle = modal.querySelector('#dark-mode-toggle') as HTMLInputElement;
-        if (toggle) toggle.checked = document.documentElement.getAttribute('data-theme') === 'dark';
+            // Mark bill as paid
+            const billItem = target.closest('.bill-item');
+            if (billItem && target.closest('#bill-list')) {
+                const id = parseInt(billItem.getAttribute('data-id') || '0');
+                if (id) {
+                    if (await healthianConfirm('Mark Bill As Paid?', 'This will remove the bill reminder from Upcoming Bills.')) {
+                        const bill = state.bills.find((entry) => entry.id === id);
+                        state.bills = state.bills.filter((entry) => entry.id !== id);
+                        renderAll();
+                        syncToCloud();
+                        showToast(bill ? `${bill.name} marked paid` : 'Bill marked as paid', false);
+                    }
+                }
+                return;
+            }
 
-        modal.classList.add('show');
-    });
-    
-    document.querySelector('.close-settings')?.addEventListener('click', () => document.getElementById('settings-modal')?.classList.remove('show'));
+            // Savings goal click
+            if (target.closest('.goal-card')) {
+                const v = await healthianPrompt('Add to savings (₹):', '100');
+                if (v) {
+                    state.savingsProgress = Math.min(state.savingsProgress + parseFloat(v), state.savingsGoal);
+                    renderAll();
+                    syncToCloud();
+                    showToast(`₹${v} added to ${state.goalTitle} goal!`, false);
+                }
+                return;
+            }
+        });
+        (window as any)._budgetGlobalInit = true;
+    }
 
-    document.getElementById('save-settings-btn')?.addEventListener('click', () => {
-        const h = document.getElementById('inp-height') as HTMLInputElement;
-        const wm = document.getElementById('inp-wt-min') as HTMLInputElement;
-        const wx = document.getElementById('inp-wt-max') as HTMLInputElement;
-        const w = document.getElementById('inp-water') as HTMLInputElement;
-        const s = document.getElementById('inp-steps') as HTMLInputElement;
-
-        // Load main cache to preserve other daily data
-        const cacheRaw = localStorage.getItem('healthian_cache');
-        const cache = cacheRaw ? JSON.parse(cacheRaw) : { 
-            daily: {}, hr: 72, well: 85, streak: 5, prs: { deadlift: 140, squat: 120, bench: 100, run: "22:15" }, 
-            muscles: { chest: 85, back: 70, legs: 45 }, stepsGoal: 10000, waterGoal: 2.5, height: "6'0\"", weightMin: 70, weightMax: 85 
-        };
-
-        if (h) cache.height = h.value || cache.height;
-        if (wm) cache.weightMin = parseFloat(wm.value) || cache.weightMin;
-        if (wx) cache.weightMax = parseFloat(wx.value) || cache.weightMax;
-        if (w) cache.waterGoal = parseFloat(w.value) || cache.waterGoal;
-        if (s) cache.stepsGoal = parseFloat(s.value) || cache.stepsGoal;
-
-        localStorage.setItem('healthian_cache', JSON.stringify(cache));
-        
-        document.getElementById('settings-modal')?.classList.remove('show');
-        showToast("Settings updated", false);
-    });
-
-    updateNotifUI();
+    if ((window as any).updateNotifUI) (window as any).updateNotifUI();
     const dueBills = checkDueBills();
     if (dueBills.length > 0) {
         showToast(`${dueBills[0].name} is due now`, false);
-        updateNotifUI();
+        if ((window as any).updateNotifUI) (window as any).updateNotifUI();
     }
     renderAll();
 
-    // Add Expense Button
-    document.getElementById('add-expense-trigger')?.addEventListener('click', openAddExpense);
-    document.querySelector('.close-expense')?.addEventListener('click', closeAddExpense);
-    document.getElementById('add-bill-trigger')?.addEventListener('click', openBillModal);
-    document.querySelector('.close-bill')?.addEventListener('click', closeBillModal);
 
-    document.getElementById('save-expense-btn')?.addEventListener('click', () => {
-        const nameEl = document.getElementById('inp-exp-name') as HTMLInputElement;
-        const amtEl = document.getElementById('inp-exp-amount') as HTMLInputElement;
-        const catEl = document.getElementById('inp-exp-cat') as HTMLSelectElement;
-        if (!nameEl.value || !amtEl.value) return;
-        addExpense(nameEl.value, parseFloat(amtEl.value), catEl.value);
-        nameEl.value = ''; amtEl.value = '';
-        closeAddExpense();
-    });
 
-    document.getElementById('save-bill-btn')?.addEventListener('click', () => {
-        const nameEl = document.getElementById('inp-bill-name') as HTMLInputElement;
-        const amtEl = document.getElementById('inp-bill-amount') as HTMLInputElement;
-        const dateEl = document.getElementById('inp-bill-date') as HTMLInputElement;
-        const timeEl = document.getElementById('inp-bill-time') as HTMLInputElement;
-
-        if (!nameEl.value || !amtEl.value || !dateEl.value || !timeEl.value) {
-            showToast('Please fill in bill name, amount, date, and time.', true);
-            return;
-        }
-
-        addBill(nameEl.value, parseFloat(amtEl.value), dateEl.value, timeEl.value);
-        nameEl.value = '';
-        amtEl.value = '';
-        dateEl.value = '';
-        timeEl.value = '';
-        closeBillModal();
-        updateNotifUI();
-    });
-
-    // Edit Budget on balance card click
-    document.querySelector('.bal-btn')?.addEventListener('click', async () => {
-        const v = await healthianPrompt('Set Monthly Budget (₹):', state.monthlyBudget.toString());
-        if (v) {
-            state.monthlyBudget = parseFloat(v);
-            renderAll();
-            syncToCloud();
-            showToast('Budget updated!');
-        }
-    });
-
-    // Edit category limits
-    document.getElementById('cat-list')?.addEventListener('click', async (e) => {
-        const row = (e.target as HTMLElement).closest('.cat-row');
-        if (!row) return;
-        const catName = row.getAttribute('data-cat');
-        if (!catName || !state.categories[catName]) return;
-        const v = await healthianPrompt(`Set limit for ${catName} (₹):`, state.categories[catName].limit.toString());
-        if (v) {
-            state.categories[catName].limit = parseFloat(v);
-            renderAll();
-            syncToCloud();
-            showToast(`${catName} limit updated!`);
-        }
-    });
-
-    // Savings goal click
-    document.querySelector('.goal-card')?.addEventListener('click', async () => {
-        const v = await healthianPrompt('Add to savings (₹):', '100');
-        if (v) {
-            state.savingsProgress = Math.min(state.savingsProgress + parseFloat(v), state.savingsGoal);
-            renderAll();
-            syncToCloud();
-            showToast(`₹${v} added to ${state.goalTitle} goal!`);
-        }
-    });
-
-    // Delete expense (long press or click on txn)
-    document.getElementById('txn-list')?.addEventListener('click', async (e) => {
-        const item = (e.target as HTMLElement).closest('.txn-item');
-        if (!item) return;
-        const id = parseInt(item.getAttribute('data-id') || '0');
-        if (!id) return;
-        if (await healthianConfirm('Delete Expense?', 'Are you sure you want to remove this expense record?')) {
-            state.expenses = state.expenses.filter(ex => ex.id !== id);
-            renderAll();
-            syncToCloud();
-            showToast('Expense deleted');
-        }
-    });
-
-    document.getElementById('bill-list')?.addEventListener('click', async (e) => {
-        const item = (e.target as HTMLElement).closest('.bill-item');
-        if (!item) return;
-        const id = parseInt(item.getAttribute('data-id') || '0');
-        if (!id) return;
-
-        if (await healthianConfirm('Mark Bill As Paid?', 'This will remove the bill reminder from Upcoming Bills.')) {
-            const bill = state.bills.find((entry) => entry.id === id);
-            state.bills = state.bills.filter((entry) => entry.id !== id);
-            renderAll();
-            syncToCloud();
-            showToast(bill ? `${bill.name} marked paid` : 'Bill marked as paid', false);
-        }
-    });
 
     // Premium Floating Nav: Show/Hide on Scroll
     if (!(window as any)._budgetScrollBound) {
@@ -808,11 +759,13 @@ async function init() {
         (window as any)._budgetScrollBound = true;
     }
 
-    document.body.classList.add('ready');
+   // ...
+
 }
 
-(window as any).initBudget = init;
-(window as any).customAddExpense = addExpense;
+export function initBudget() {
+    return init();
+}
 
-// Bootstrap
-init();
+(window as any).initBudget = initBudget;
+(window as any).customAddExpense = addExpense;

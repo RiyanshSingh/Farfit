@@ -75,7 +75,12 @@
             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80"
                 class="avatar" alt="User" id="settings-trigger" style="cursor:pointer;" title="Profile Settings">
             <div style="position:relative; display:flex; align-items:center; gap:12px;">
-                <button class="bell-btn" id="bell-trigger">
+                            <button class="search-trigger-btn" id="search-trigger" title="Command Palette (Cmd+K)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>
+                </svg>
+            </button>
+            <button class="bell-btn" id="bell-trigger">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
@@ -170,7 +175,7 @@
                         </div>
                         <div class="stat-name">Weight</div>
                         <div class="stat-desc">Healthy weight is 72-82kg</div>
-                        <div class="stat-val">198 <span>lbs</span></div>
+                        <div class="stat-val">75.2 <span>kg</span></div>
                     </div>
 
                     <!-- Water -->
@@ -430,7 +435,7 @@
                                     <path stroke="#f0f4f6" stroke-width="3" fill="none"
                                         d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" />
                                     <path stroke="#7dd4e0" stroke-width="3" fill="none" stroke-linecap="round"
-                                        stroke-dasharray="64, 100" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" />
+                                        pathLength="100" stroke-dasharray="0, 100" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" />
                                 </svg>
                                 <div class="steps-icon-inner">
                                     <img src="/steps.jpg"
@@ -441,7 +446,7 @@
                             <div>
                                 <div style="color:#888; font-size:14px; font-weight:800;">Steps</div>
                                 <div class="hero-steps-val" style="font-size:32px; font-weight:900;">0 <span
-                                        style="font-size:18px; color:#bbb; font-weight:700;">/ 10,000</span></div>
+                                        style="font-size:18px; color:#bbb; font-weight:700;">/ 8,000</span></div>
                             </div>
                         </div>
 
